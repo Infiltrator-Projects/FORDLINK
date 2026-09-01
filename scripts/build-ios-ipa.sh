@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+# SPDX-License-Identifier: GPL-3.0-or-later
+set -euo pipefail
+
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+out_dir="${1:-$repo_root/dist}"
+out_name="${2:-}"
+version="$(tr -d '[:space:]' < "$repo_root/VERSION")"
+[[ "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
+revision="$(git -C "$repo_root" rev-parse HEAD 2>/dev/null || printf '%s' unavailable)"
+
+if [[ "$(uname -s)" != "Darwin" ]]; then
+  echo "build-ios-ipa.sh requires macOS with Xcode." >&2
+  exit 2
+fi
+command -v xcodebuild >/dev/null
+command -v zip >/dev/null
+command -v shasum >/dev/null
+
+mkdir -p "$out_dir"
+out_dir="$(cd "$out_dir" && pwd)"
+derived="$(mktemp -d "${TMPDIR:-/tmp}/fordlink-ipa.XXXXXX")"
+package="$(mktemp -d "${TMPDIR:-/tmp}/fordlink-payload.XXXXXX")"
+trap 'rm -rf "$derived" "$package"' EXIT
+
+xcodebuild \
+  -project "$repo_root/app/ios/FORDLINK.xcodeproj" \
+  -scheme FORDLINK \
+  -configuration Release \
+  -sdk iphoneos \
+  -destination 'generic/platform=iOS' \
+  -derivedDataPath "$derived" \
+  MARKETING_VERSION="$version" \
+  FORDLINK_SOURCE_REVISION="$revision" \
+  CODE_SIGNING_ALLOWED=NO \
+  CODE_SIGNING_REQUIRED=NO \
+  CODE_SIGN_IDENTITY='' \
+  build
+
+app="$derived/Build/Products/Release-iphoneos/FORDLINK.app"
+test -d "$app"
+test -x "$app/FORDLINK"
+/usr/bin/lipo -info "$app/FORDLINK" | grep -q arm64
+
+if [[ -z "$out_name" ]]; then
+  out_name="FORDLINK-${version}-unsigned.ipa"
+fi
+ipa="$out_dir/$out_name"
+mkdir -p "$package/Payload"
+/usr/bin/ditto "$app" "$package/Payload/FORDLINK.app"
+(
+  cd "$package"
+  /usr/bin/zip -qry "$ipa" Payload
+)
+/usr/bin/unzip -tq "$ipa"
+(
+  cd "$out_dir"
+  shasum -a 256 "$out_name" > "$out_name.sha256"
+)
+printf '%s\n' "$ipa"
