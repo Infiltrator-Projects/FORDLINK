@@ -33,8 +33,8 @@ int main(void)
               LINK_ADAPTER_KIND_TACTRIX_OPENPORT2) ==
           LINK_DIAGNOSTIC_EXECUTION_NATIVE_ISOTP);
 
-    CHECK(fordlink_isotp_can_data_length_is_valid(8U));
-    CHECK(fordlink_isotp_can_data_length_is_valid(64U));
+    CHECK(fordlink_isotp_can_data_length_is_valid(false, 8U));
+    CHECK(fordlink_isotp_can_data_length_is_valid(true, 64U));
     CHECK(fordlink_uds_standard_service_count() == LINK_UDS_STANDARD_SERVICE_COUNT);
     CHECK(fordlink_uds_standard_service_find(
               LINK_UDS_SERVICE_READ_DATA_BY_IDENTIFIER) != NULL);
