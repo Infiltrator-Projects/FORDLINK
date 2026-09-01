@@ -1,0 +1,64 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+name: FORDLINK Release
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    if: startsWith(github.event.head_commit.message, 'Release 0.1.0')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          submodules: recursive
+
+      - name: Verify release identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(tr -d '[:space:]' < VERSION)" = "0.1.0"
+          test "$(git rev-parse HEAD:src/link)" = "a945483748544ed209b78c8c1259fe9ad17e8101"
+          test "$(tr -d '[:space:]' < src/link/VERSION)" = "0.14.67"
+
+      - name: Configure
+        run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build
+        run: cmake --build build --parallel
+
+      - name: Test
+        run: ctest --test-dir build --output-on-failure
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if gh release view v0.1.0 >/dev/null 2>&1; then
+            echo "v0.1.0 already exists; refusing to repoint release"
+            exit 1
+          fi
+          cat > release-notes.md <<'EOF'
+          FORDLINK 0.1.0 establishes the generic LINK-based diagnostic baseline.
+
+          This release includes:
+          - pinned LINK 0.14.67;
+          - standard SAE OBD-II/J1979 diagnostics;
+          - generic DTC knowledge and OBDonUDS;
+          - ELM327 protocol/session/CAN/probing;
+          - ISO-TP for Classical CAN and CAN FD;
+          - the shared 27-service UDS catalogue;
+          - DoIP framing;
+          - transport-neutral diagnostic requests;
+          - read-only discovery safety/evidence primitives;
+          - parameter storage/scheduling and telemetry foundations.
+
+          Manufacturer-specific proprietary coverage is intentionally not claimed yet.
+          EOF
+          gh release create v0.1.0             --target "$GITHUB_SHA"             --title "FORDLINK 0.1.0"             --notes-file release-notes.md
