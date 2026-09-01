@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 cmake_minimum_required(VERSION 3.20)
-project(FORDLINK VERSION 0.0.1 LANGUAGES C)
+project(FORDLINK VERSION 0.1.0 LANGUAGES C)
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
@@ -25,3 +25,7 @@ add_test(NAME fordlink-smoke COMMAND fordlink-smoke)
 add_executable(fordlink-obd2 tests/test_obd2.c)
 target_link_libraries(fordlink-obd2 PRIVATE FORDLINK::Core)
 add_test(NAME fordlink-obd2 COMMAND fordlink-obd2)
+
+add_executable(fordlink-generic-diagnostics tests/test_generic_diagnostics.c)
+target_link_libraries(fordlink-generic-diagnostics PRIVATE FORDLINK::Core)
+add_test(NAME fordlink-generic-diagnostics COMMAND fordlink-generic-diagnostics)

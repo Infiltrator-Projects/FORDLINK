@@ -6,7 +6,7 @@
 extern "C" {
 #endif
 
-#define FORDLINK_VERSION "0.0.1"
+#define FORDLINK_VERSION "0.1.0"
 #define FORDLINK_BRAND "Ford"
 
 const char *fordlink_product_name(void);

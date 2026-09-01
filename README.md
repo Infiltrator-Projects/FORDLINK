@@ -30,14 +30,14 @@ diagnostic engine.
 That baseline includes standard supported-PID discovery, current-data PID
 request construction and decoding, freeze-frame reads, readiness, VIN,
 stored/pending/permanent DTC reads, generic SAE DTC decoding/knowledge, and
-LINK's standard OBDonUDS mapping. See `docs/OBD2.md`.
+LINK's standard OBDonUDS mapping. See `docs/OBD2.md` and `docs/GENERIC_BASELINE.md`.
 
 CI exercises this inherited OBD path directly so FORDLINK cannot silently
 become a brand shell that no longer exposes LINK's standard diagnostics.
 
 ## Status
 
-Standard OBD-II baseline: **available through LINK**.
+Generic diagnostic baseline: **available through LINK** — adapter capability modelling, ELM327 sessions/CAN, standard OBD-II, ISO-TP, UDS, DoIP framing, read-only discovery safety, parameters/scheduling, telemetry/evidence and transport-neutral diagnostic requests.
 
 Ford-specific/proprietary vehicle coverage: not claimed yet; it will be added
 here only from evidence-backed Ford data.
