@@ -44,7 +44,7 @@ jobs:
           log="$RUNNER_TEMP/navigation.log"
           GTK_A11Y=none G_DEBUG=fatal-warnings timeout 45s xvfb-run -a ./build-linux/fordlink --ui-navigation-stress | tee "$log"
           grep -Fq 'LINK GTK timed navigation stress verified:' "$log"
-          grep -Fq 'desktop product is GUI-first' app/linux/main.c
+          grep -Fq 'FORDLINK is GUI-first' app/linux/main.c
       - name: Verify Debian GUI payload
         shell: bash
         run: |
