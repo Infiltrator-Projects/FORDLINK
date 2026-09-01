@@ -1,13 +1,9 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 cmake_minimum_required(VERSION 3.20)
-project(FORDLINK VERSION 0.1.1 LANGUAGES C)
-
+project(FORDLINK VERSION 0.2.0 LANGUAGES C)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
-
-# LINK owns the shared diagnostic engines. Keep its tests out of this small
-# product skeleton; FORDLINK's own smoke test remains enabled below.
 set(BUILD_TESTING OFF CACHE BOOL "" FORCE)
 add_subdirectory(src/link EXCLUDE_FROM_ALL)
 set(BUILD_TESTING ON CACHE BOOL "" FORCE)
@@ -16,37 +12,59 @@ enable_testing()
 add_library(fordlink-core STATIC src/fordlink.c)
 add_library(FORDLINK::Core ALIAS fordlink-core)
 target_include_directories(fordlink-core PUBLIC include)
+target_compile_definitions(fordlink-core PRIVATE FORDLINK_VERSION="0.2.0")
 target_link_libraries(fordlink-core PUBLIC LINK::Core)
 
 add_executable(fordlink-smoke tests/test_smoke.c)
 target_link_libraries(fordlink-smoke PRIVATE FORDLINK::Core)
 add_test(NAME fordlink-smoke COMMAND fordlink-smoke)
-
 add_executable(fordlink-obd2 tests/test_obd2.c)
 target_link_libraries(fordlink-obd2 PRIVATE FORDLINK::Core)
 add_test(NAME fordlink-obd2 COMMAND fordlink-obd2)
-
 add_executable(fordlink-generic-diagnostics tests/test_generic_diagnostics.c)
 target_link_libraries(fordlink-generic-diagnostics PRIVATE FORDLINK::Core)
 add_test(NAME fordlink-generic-diagnostics COMMAND fordlink-generic-diagnostics)
 
+option(FORDLINK_BUILD_LINUX_GUI "Build native GTK4 GUI" OFF)
+option(FORDLINK_BUILD_WINDOWS_DISCOVER "Build Win32 Discover GUI" ${WIN32})
 include(GNUInstallDirs)
 
-add_executable(fordlink app/linux/main.c)
-target_link_libraries(fordlink PRIVATE FORDLINK::Core)
+if(FORDLINK_BUILD_LINUX_GUI)
+  if(NOT UNIX OR APPLE)
+    message(FATAL_ERROR "FORDLINK_BUILD_LINUX_GUI is Linux-only")
+  endif()
+  find_package(PkgConfig REQUIRED)
+  pkg_check_modules(GTK4 REQUIRED IMPORTED_TARGET gtk4>=4.6)
+  add_executable(fordlink app/linux/main.c)
+  target_link_libraries(fordlink PRIVATE FORDLINK::Core PkgConfig::GTK4)
+  link_enable_linux_gtk_shell(fordlink UDEV_RULE_NAME "60-fordlink-openport2.rules")
+  install(TARGETS fordlink RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
+  install(FILES app/linux/fordlink.desktop DESTINATION "${CMAKE_INSTALL_DATADIR}/applications")
+  install(FILES README.md docs/OBD2.md docs/GENERIC_BASELINE.md DESTINATION "${CMAKE_INSTALL_DATADIR}/doc/fordlink")
+  set(CPACK_GENERATOR "DEB")
+  set(CPACK_PACKAGE_NAME "fordlink")
+  set(CPACK_PACKAGE_VENDOR "Infiltrator Projects")
+  set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Ford diagnostics GUI using LINK")
+  set(CPACK_PACKAGE_VERSION "${PROJECT_VERSION}")
+  set(CPACK_PACKAGE_CONTACT "Infiltrator Projects")
+  set(CPACK_PACKAGING_INSTALL_PREFIX "/usr")
+  set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Infiltrator Projects")
+  set(CPACK_DEBIAN_PACKAGE_SECTION "utils")
+  set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "amd64")
+  set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS ON)
+  set(CPACK_DEBIAN_FILE_NAME DEB-DEFAULT)
+  set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
+  include(CPack)
+endif()
 
-install(TARGETS fordlink RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
-install(FILES README.md docs/OBD2.md docs/GENERIC_BASELINE.md
-        DESTINATION "${CMAKE_INSTALL_DATADIR}/doc/fordlink")
-
-set(CPACK_PACKAGE_NAME "fordlink")
-set(CPACK_PACKAGE_VENDOR "FORDLINK Project")
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Ford diagnostics with a generic LINK standards baseline")
-set(CPACK_PACKAGE_VERSION "${PROJECT_VERSION}")
-set(CPACK_PACKAGE_CONTACT "Infiltrator Projects")
-set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Infiltrator Projects")
-set(CPACK_DEBIAN_PACKAGE_SECTION "utils")
-set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "amd64")
-set(CPACK_DEBIAN_FILE_NAME DEB-DEFAULT)
-set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
-include(CPack)
+if(FORDLINK_BUILD_WINDOWS_DISCOVER)
+  if(NOT WIN32)
+    message(FATAL_ERROR "FORDLINK_BUILD_WINDOWS_DISCOVER is Windows-only")
+  endif()
+  link_add_windows_discover(fordlink-discover
+    PRODUCT_NAME "FORDLINK" PRODUCT_SLUG "fordlink" WINDOW_CLASS "FORDLINKDiscoverWindow"
+    PRODUCT_VERSION "${PROJECT_VERSION}" PRODUCT_COPYRIGHT "Copyright (C) 2026 Shannon Smith"
+    PRODUCT_SUBTITLE "Ford Diagnostics"
+    PRODUCT_WEBSITE "https://github.com/Infiltrator-Projects/FORDLINK")
+  target_link_libraries(fordlink-discover PRIVATE FORDLINK::Core)
+endif()
