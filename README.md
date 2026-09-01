@@ -1,0 +1,27 @@
+# FORDLINK
+
+FORDLINK is the Ford-specific member of the LINK diagnostic family.
+
+## Architecture
+
+FORDLINK owns only Ford-specific diagnostic behaviour: vehicle/profile
+selection, ECU/module knowledge, proprietary identifiers, manufacturer DTC
+knowledge, addressing, security/session policy and brand-specific workflows.
+
+Reusable transport and protocol code belongs in
+[LINK](https://github.com/Infiltrator-Projects/LINK): CAN/CAN-FD, ISO-TP,
+OBD-II/J1979, UDS, KWP where shared, diagnostic flow, adapters/transports and
+portable platform support.
+
+This repository deliberately starts small. Manufacturer-specific behaviour
+must be evidence-backed rather than guessed or copied from another brand.
+
+## Dependency
+
+The `src/link` gitlink pins a tested LINK release. Product code must consume
+that pin rather than duplicate LINK sources.
+
+## Status
+
+Repository skeleton only. No claim of Ford-specific vehicle coverage is
+made yet.
