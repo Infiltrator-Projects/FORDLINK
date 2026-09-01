@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=FORDLINK
+Comment=Ford vehicle diagnostics
+Exec=fordlink
+Icon=applications-engineering
+Terminal=false
+Categories=Utility;
+Keywords=Ford;OBD;diagnostics;vehicle;
