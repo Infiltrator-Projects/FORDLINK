@@ -1,0 +1,67 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+import Combine
+import Foundation
+
+@MainActor
+final class ConnectionViewModel: NSObject, ObservableObject, @preconcurrency FordLinkDiagnosticsControllerDelegate {
+    @Published private(set) var statusText = "Idle"
+    @Published private(set) var peripheralName = "No adapter"
+    @Published private(set) var adapterIdentifier = "Unknown"
+    @Published private(set) var vehicleVINText = "Waiting for standard VIN"
+    @Published private(set) var faultScanStatusText = "Not scanned"
+    @Published private(set) var storedDTCs = [String]()
+    @Published private(set) var pendingDTCs = [String]()
+    @Published private(set) var permanentDTCs = [String]()
+    @Published private(set) var readinessStatusText = "Not read"
+    @Published private(set) var standardLiveRows = [String]()
+    @Published private(set) var isActive = false
+    @Published private(set) var isReady = false
+    @Published private(set) var recordedSampleCount = 0
+    @Published private(set) var versionText = "Unknown"
+    @Published private(set) var csvExportURL: URL?
+
+    private let controller = FordLinkDiagnosticsController()
+
+    override init() {
+        super.init()
+        controller.delegate = self
+        if let value = fordlink_version() { versionText = String(cString: value) }
+        refresh()
+    }
+
+    func connect() { if !isActive { controller.start() } }
+    func disconnect() { controller.disconnect() }
+
+    func prepareCSVExport() {
+        guard let snapshot = controller.csvDataSnapshot() else { return }
+        let data = snapshot as Data
+        let url = FileManager.default.temporaryDirectory
+            .appendingPathComponent("FORDLINK-diagnostic-evidence-\(UUID().uuidString).csv")
+        do {
+            try data.write(to: url, options: .atomic)
+            csvExportURL = url
+        } catch {
+            csvExportURL = nil
+        }
+    }
+
+    func diagnosticsControllerDidUpdate(_ controller: FordLinkDiagnosticsController) {
+        refresh()
+    }
+
+    private func refresh() {
+        statusText = controller.statusText
+        peripheralName = controller.peripheralName ?? "No adapter"
+        adapterIdentifier = controller.adapterIdentifier ?? "Unknown"
+        vehicleVINText = controller.vehicleVINText
+        faultScanStatusText = controller.faultScanStatusText
+        storedDTCs = controller.storedDTCs
+        pendingDTCs = controller.pendingDTCs
+        permanentDTCs = controller.permanentDTCs
+        readinessStatusText = controller.readinessStatusText
+        standardLiveRows = controller.standardLiveValueRows
+        isActive = controller.isActive
+        isReady = controller.isReady
+        recordedSampleCount = Int(clamping: controller.recordedSampleCount)
+    }
+}
