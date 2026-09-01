@@ -31,6 +31,9 @@ int main(void)
           LINK_DIAGNOSTIC_EXECUTION_ELM_COMMAND_SURFACE);
     CHECK(fordlink_diagnostic_execution_mode_for_adapter(
               LINK_ADAPTER_KIND_TACTRIX_OPENPORT2) ==
+          LINK_DIAGNOSTIC_EXECUTION_ELM_COMMAND_SURFACE);
+    CHECK(fordlink_diagnostic_execution_mode_for_adapter(
+              LINK_ADAPTER_KIND_STM32_LINK) ==
           LINK_DIAGNOSTIC_EXECUTION_NATIVE_ISOTP);
 
     CHECK(fordlink_isotp_can_data_length_is_valid(false, 8U));
