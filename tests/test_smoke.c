@@ -8,7 +8,7 @@ int main(void)
 {
     if (strcmp(fordlink_product_name(), "FORDLINK") != 0) return 1;
     if (strcmp(fordlink_brand_name(), "Ford") != 0) return 2;
-    if (strcmp(fordlink_version(), "0.1.0") != 0) return 3;
+    if (strcmp(fordlink_version(), "0.1.1") != 0) return 3;
     puts("FORDLINK skeleton smoke test passed");
     return 0;
 }

@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 cmake_minimum_required(VERSION 3.20)
-project(FORDLINK VERSION 0.1.0 LANGUAGES C)
+project(FORDLINK VERSION 0.1.1 LANGUAGES C)
 
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
@@ -29,3 +29,24 @@ add_test(NAME fordlink-obd2 COMMAND fordlink-obd2)
 add_executable(fordlink-generic-diagnostics tests/test_generic_diagnostics.c)
 target_link_libraries(fordlink-generic-diagnostics PRIVATE FORDLINK::Core)
 add_test(NAME fordlink-generic-diagnostics COMMAND fordlink-generic-diagnostics)
+
+include(GNUInstallDirs)
+
+add_executable(fordlink app/linux/main.c)
+target_link_libraries(fordlink PRIVATE FORDLINK::Core)
+
+install(TARGETS fordlink RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
+install(FILES README.md docs/OBD2.md docs/GENERIC_BASELINE.md
+        DESTINATION "${CMAKE_INSTALL_DATADIR}/doc/fordlink")
+
+set(CPACK_PACKAGE_NAME "fordlink")
+set(CPACK_PACKAGE_VENDOR "FORDLINK Project")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Ford diagnostics with a generic LINK standards baseline")
+set(CPACK_PACKAGE_VERSION "${PROJECT_VERSION}")
+set(CPACK_PACKAGE_CONTACT "Infiltrator Projects")
+set(CPACK_DEBIAN_PACKAGE_MAINTAINER "Infiltrator Projects")
+set(CPACK_DEBIAN_PACKAGE_SECTION "utils")
+set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "amd64")
+set(CPACK_DEBIAN_FILE_NAME DEB-DEFAULT)
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
+include(CPack)
