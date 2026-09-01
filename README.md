@@ -21,7 +21,23 @@ must be evidence-backed rather than guessed or copied from another brand.
 The `src/link` gitlink pins a tested LINK release. Product code must consume
 that pin rather than duplicate LINK sources.
 
+## Baseline functionality
+
+Even before Ford-specific definitions are added, FORDLINK is already a
+functional **standard OBD-II core** because it consumes the pinned LINK
+diagnostic engine.
+
+That baseline includes standard supported-PID discovery, current-data PID
+request construction and decoding, freeze-frame reads, readiness, VIN,
+stored/pending/permanent DTC reads, generic SAE DTC decoding/knowledge, and
+LINK's standard OBDonUDS mapping. See `docs/OBD2.md`.
+
+CI exercises this inherited OBD path directly so FORDLINK cannot silently
+become a brand shell that no longer exposes LINK's standard diagnostics.
+
 ## Status
 
-Repository skeleton only. No claim of Ford-specific vehicle coverage is
-made yet.
+Standard OBD-II baseline: **available through LINK**.
+
+Ford-specific/proprietary vehicle coverage: not claimed yet; it will be added
+here only from evidence-backed Ford data.

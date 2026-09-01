@@ -21,3 +21,7 @@ target_link_libraries(fordlink-core PUBLIC LINK::Core)
 add_executable(fordlink-smoke tests/test_smoke.c)
 target_link_libraries(fordlink-smoke PRIVATE FORDLINK::Core)
 add_test(NAME fordlink-smoke COMMAND fordlink-smoke)
+
+add_executable(fordlink-obd2 tests/test_obd2.c)
+target_link_libraries(fordlink-obd2 PRIVATE FORDLINK::Core)
+add_test(NAME fordlink-obd2 COMMAND fordlink-obd2)
