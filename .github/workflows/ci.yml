@@ -6,6 +6,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   core:
     name: Portable C11 core
@@ -76,6 +80,7 @@ jobs:
 
   iphone-gui:
     name: iPhone SwiftUI GUI
+    if: startsWith(github.event.head_commit.message, 'Release ')
     runs-on: macos-latest
     timeout-minutes: 30
     steps:
