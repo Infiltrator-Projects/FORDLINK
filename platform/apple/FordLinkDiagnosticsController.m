@@ -37,6 +37,12 @@
 - (NSArray<NSString *> *)pendingDTCs { return self.shared.pendingDTCs; }
 - (NSArray<NSString *> *)permanentDTCs { return self.shared.permanentDTCs; }
 - (NSString *)readinessStatusText { return self.shared.readinessStatusText; }
+- (NSArray<NSString *> *)readinessMonitorStatus { return self.shared.readinessMonitorStatus; }
+- (NSArray<NSString *> *)freezeFrameContext { return self.shared.freezeFrameContext; }
+- (NSString *)diagnosticCapabilityText { return self.shared.diagnosticCapabilityText; }
+- (NSString *)diagnosticCapabilityDetailText { return self.shared.diagnosticCapabilityDetailText; }
+- (NSString *)standardResponderSummary { return self.shared.standardResponderSummary; }
+- (NSString *)supportedPIDSummary { return self.shared.supportedPIDSummary; }
 - (BOOL)isActive { return self.shared.isActive; }
 - (BOOL)isReady { return self.shared.isReady; }
 - (NSUInteger)recordedSampleCount { return self.shared.recordedSampleCount; }
