@@ -46,31 +46,11 @@
 - (BOOL)isActive { return self.shared.isActive; }
 - (BOOL)isReady { return self.shared.isReady; }
 - (NSUInteger)recordedSampleCount { return self.shared.recordedSampleCount; }
-- (NSArray<NSString *> *)standardLiveValueRows {
-    const LinkDiagnosticFlow *flow = [self.shared diagnosticFlow];
-    NSMutableArray<NSString *> *rows = [NSMutableArray array];
-    if (flow == NULL) return rows;
-    for (NSUInteger raw = 1U; raw <= UINT8_MAX; ++raw) {
-        const uint8_t pid = (uint8_t)raw;
-        if (!link_obd2_pid_set_contains(&flow->supported_pids, pid)) continue;
-        const LinkObd2PidDefinition *definition = link_obd2_pid_definition(1U, pid);
-        const char *name = definition != NULL && definition->name != NULL
-            ? definition->name : link_obd2_pid_name(pid);
-        NSArray<NSNumber *> *history = [self.shared recentValuesForPID:pid limit:1U];
-        if (history.count != 0U) {
-            NSString *unit = definition != NULL && definition->unit != NULL
-                ? [NSString stringWithUTF8String:definition->unit] : @"";
-            [rows addObject:[NSString stringWithFormat:@"PID %02lX · %s — %.3f%@%@",
-                (unsigned long)pid, name != NULL ? name : "Unknown",
-                history.lastObject.doubleValue,
-                unit.length != 0U ? @" " : @"", unit]];
-        } else {
-            [rows addObject:[NSString stringWithFormat:@"PID %02lX · %s — waiting",
-                (unsigned long)pid, name != NULL ? name : "Unknown"]];
-        }
-    }
-    return rows;
+- (NSArray<NSString *> *)standardLiveValueRows
+{
+    return self.shared.standardLiveValueRows;
 }
+
 - (void)start { [self.shared start]; }
 - (void)disconnect { [self.shared disconnect]; }
 - (NSData *)csvDataSnapshot { return [self.shared csvDataSnapshot]; }
