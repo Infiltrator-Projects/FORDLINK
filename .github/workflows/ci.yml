@@ -22,8 +22,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          test "$(git rev-parse HEAD:src/link)" = "a945483748544ed209b78c8c1259fe9ad17e8101"
-          test "$(tr -d '[:space:]' < src/link/VERSION)" = "0.14.67"
+          link_sha="$(git rev-parse HEAD:src/link)"
+          test "$link_sha" = "$(git -C src/link rev-parse HEAD)"
+          link_version="$(tr -d '[:space:]' < src/link/VERSION)"
+          grep -Fq "#define LINK_VERSION_STRING \"$link_version\"" src/link/include/link/version.h
       - run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
       - run: cmake --build build --parallel
       - run: ctest --test-dir build --output-on-failure
@@ -49,6 +51,15 @@ jobs:
           GTK_A11Y=none G_DEBUG=fatal-warnings timeout 45s xvfb-run -a ./build-linux/fordlink --ui-navigation-stress | tee "$log"
           grep -Fq 'LINK GTK timed navigation stress verified:' "$log"
           grep -Fq 'FORDLINK is GUI-first' app/linux/main.c
+          if grep -Eq '\.link-(connection-bar|device-row|adapter-combo|toolbar-button|link-button|save-session-button|card|status-chip)[^{]*\{[^}]*((min|max)-(width|height)|padding|border-radius)' app/linux/main.c; then
+            echo 'Shared Linux shell geometry must come from LINK, not FORDLINK CSS.' >&2
+            exit 1
+          fi
+          if grep -Fq 'adapter_combo_width' app/linux/main.c src/link/platform/linux/link-gtk-shell.h; then
+            echo 'Adapter-selector width must be LINK-owned.' >&2
+            exit 1
+          fi
+          grep -Fq 'gtk_widget_set_hexpand(shell->device_combo, TRUE);' src/link/platform/linux/link-gtk-shell.c
       - name: Verify Debian GUI payload
         shell: bash
         run: |

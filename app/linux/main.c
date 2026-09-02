@@ -20,15 +20,15 @@ typedef struct {
 
 static const char css[] =
 "window { background:#090b0e; color:#eef1f4; }"
-".link-connection-bar { background:#14181d; border:1px solid rgba(255,255,255,.14); }"
-".link-link-button { background:#e8edf2; color:#111418; border-radius:10px; }"
-".link-card { background:#12161b; border:1px solid rgba(255,255,255,.12); border-radius:16px; padding:18px; }"
-".link-card-kicker { color:#9fa8b3; font-size:10px; font-weight:800; letter-spacing:1.5px; }"
-".link-card-title { color:#f5f7f9; font-size:20px; font-weight:800; }"
+".link-connection-bar { background:#14181d; border-color:rgba(255,255,255,.14); }"
+".link-link-button { background:#e8edf2; color:#111418; }"
+".link-card { background:#12161b; border-color:rgba(255,255,255,.12); }"
+".link-card-kicker { color:#9fa8b3; font-weight:800; }"
+".link-card-title { color:#f5f7f9; font-weight:800; }"
 ".link-detail-label { color:#9fa8b3; }"
 ".link-detail-value { color:#f5f7f9; font-weight:700; }"
 ".link-card-note { color:#aeb6bf; }"
-".link-status-chip { padding:6px 10px; border-radius:999px; border:1px solid rgba(255,255,255,.18); font-weight:700; }"
+".link-status-chip { border-color:rgba(255,255,255,.18); font-weight:700; }"
 ".state-success { color:#a8e0b9; border-color:#4f8c63; }"
 ".state-warning { color:#e0c486; border-color:#8b7444; }";
 
@@ -79,4 +79,4 @@ static void generic(GtkWidget *b,ProductContext *c,const char *k,const char *t,c
 static void render(size_t s,GtkWidget *b,void *ctx){ProductContext *c=ctx;switch((LinkWorkspaceSection)s){case LINK_WORKSPACE_VEHICLE:vehicle(b,c);break;case LINK_WORKSPACE_MODULES:modules(b,c);break;case LINK_WORKSPACE_FAULTS:faults(b,c);break;case LINK_WORKSPACE_LIVE_DATA:live(b,c,"LIVE DATA","Supported SAE parameters");break;case LINK_WORKSPACE_TABLE:live(b,c,"TABLE","Dense live parameter table");break;case LINK_WORKSPACE_DASHBOARD:generic(b,c,"DASHBOARD","Diagnostic overview","Dashboard tiles use the same LINK live samples; there is no CLI product mode.");break;case LINK_WORKSPACE_GRAPHS:generic(b,c,"GRAPHS","Time-series workspace","Graphs consume recorded LINK telemetry and will expand with verified manufacturer data.");break;case LINK_WORKSPACE_LOG:generic(b,c,"LOG","Diagnostic evidence","Use SAVE SESSION to preserve the raw investigation record.");break;case LINK_WORKSPACE_SETTINGS:generic(b,c,"SETTINGS","FORDLINK preferences","Adapter and diagnostic behaviour are shared through LINK.");break;default:break;}}
 static void conn(LinkTransport *t,bool connected,const char *id,void *ctx){ProductContext *c=ctx;(void)t;c->connected=connected;snprintf(c->adapter_identity,sizeof c->adapter_identity,"%s",id?id:"");if(!connected){c->diagnostic_valid=false;c->diagnostic_ready=false;memset(c->sample_valid,0,sizeof c->sample_valid);}}
 static void diag(const LinkDiagnosticFlow *f,const LinkDiagnosticFlowEvent *e,bool active,bool ready,void *ctx){ProductContext *c=ctx;(void)active;if(f){c->diagnostic=*f;c->diagnostic_valid=true;}c->diagnostic_ready=ready;if(e&&e->kind==LINK_DIAGNOSTIC_FLOW_EVENT_LIVE_SAMPLE){uint8_t p=e->sample.pid;c->samples[p]=e->sample;c->sample_valid[p]=true;}}
-int main(int argc,char **argv){ProductContext c={0};LinkGtkShellDescriptor d={0};d.app_id="com.github.InfiltratorProjects.FORDLINK";d.window_title="FORDLINK · Ford Diagnostics";d.brand_name="FORDLINK";d.brand_subtitle="Ford · LINK standards diagnostics";d.version=fordlink_version();d.css=css;d.render_section=render;d.connection_changed=conn;d.diagnostic_changed=diag;d.use_client_side_titlebar=true;d.adapter_combo_width=320;d.context=&c;return link_gtk_shell_run(argc,argv,&d);}
+int main(int argc,char **argv){ProductContext c={0};LinkGtkShellDescriptor d={0};d.app_id="com.github.InfiltratorProjects.FORDLINK";d.window_title="FORDLINK · Ford Diagnostics";d.brand_name="FORDLINK";d.brand_subtitle="Ford · LINK standards diagnostics";d.version=fordlink_version();d.css=css;d.render_section=render;d.connection_changed=conn;d.diagnostic_changed=diag;d.use_client_side_titlebar=true;d.context=&c;return link_gtk_shell_run(argc,argv,&d);}
