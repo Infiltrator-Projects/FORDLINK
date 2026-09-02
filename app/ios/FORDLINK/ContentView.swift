@@ -46,17 +46,12 @@ private let productTheme = LinkDiagnosticTheme(
 
 private struct ProductBadge: View {
     var body: some View {
-        ZStack {
-            Circle()
-                .fill(ProductTheme.primary)
-                .frame(width: 52, height: 52)
-            Text("F")
-                .font(.system(size: 25, weight: .black, design: .rounded))
-                .foregroundStyle(ProductTheme.backgroundTop)
-        }
-        .overlay(Circle().stroke(ProductTheme.accent, lineWidth: 2))
-        .shadow(color: .black.opacity(0.28), radius: 7, x: 0, y: 4)
-        .accessibilityHidden(true)
+        Image("FORDLINKEmblem")
+            .resizable()
+            .scaledToFit()
+            .frame(width: 56, height: 56)
+            .shadow(color: .black.opacity(0.28), radius: 7, x: 0, y: 4)
+            .accessibilityHidden(true)
     }
 }
 

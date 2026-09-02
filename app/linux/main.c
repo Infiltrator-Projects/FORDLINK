@@ -377,6 +377,7 @@ int main(int argc, char **argv)
     descriptor.brand_name = "FORDLINK";
     descriptor.brand_subtitle = "FORD · LINK DIAGNOSTICS";
     descriptor.version = fordlink_version();
+    descriptor.emblem_resource = "/com/github/Infiltrator-Projects/FORDLINK/fordlink-emblem.png";
     descriptor.css = css;
     descriptor.render_section = render;
     descriptor.connection_changed = connection_changed;
