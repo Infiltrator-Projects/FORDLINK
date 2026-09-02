@@ -8,7 +8,7 @@ int main(void)
 {
     if (strcmp(fordlink_product_name(), "FORDLINK") != 0) return 1;
     if (strcmp(fordlink_brand_name(), "Ford") != 0) return 2;
-    if (strcmp(fordlink_version(), "0.2.0") != 0) return 3;
+    if (strcmp(fordlink_version(), "0.2.4") != 0) return 3;
     puts("FORDLINK GUI product smoke test passed");
     return 0;
 }

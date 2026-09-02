@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 cmake_minimum_required(VERSION 3.20)
-project(FORDLINK VERSION 0.2.3 LANGUAGES C)
+project(FORDLINK VERSION 0.2.4 LANGUAGES C)
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
@@ -12,7 +12,7 @@ enable_testing()
 add_library(fordlink-core STATIC src/fordlink.c)
 add_library(FORDLINK::Core ALIAS fordlink-core)
 target_include_directories(fordlink-core PUBLIC include)
-target_compile_definitions(fordlink-core PRIVATE FORDLINK_VERSION="0.2.3")
+target_compile_definitions(fordlink-core PRIVATE FORDLINK_VERSION="0.2.4")
 target_link_libraries(fordlink-core PUBLIC LINK::Core)
 
 add_executable(fordlink-smoke tests/test_smoke.c)
