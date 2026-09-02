@@ -19,18 +19,22 @@ typedef struct {
 } ProductContext;
 
 static const char css[] =
-"window { background:#090b0e; color:#eef1f4; }"
-".link-connection-bar { background:#14181d; border-color:rgba(255,255,255,.14); }"
-".link-link-button { background:#e8edf2; color:#111418; }"
-".link-card { background:#12161b; border-color:rgba(255,255,255,.12); }"
-".link-card-kicker { color:#9fa8b3; font-weight:800; }"
-".link-card-title { color:#f5f7f9; font-weight:800; }"
-".link-detail-label { color:#9fa8b3; }"
-".link-detail-value { color:#f5f7f9; font-weight:700; }"
-".link-card-note { color:#aeb6bf; }"
-".link-status-chip { border-color:rgba(255,255,255,.18); font-weight:700; }"
+"window { background:#06182c; color:#f4f7fb; }"
+".link-connection-bar { background:#0a2a4a; border-color:#2f6ea5; }"
+".link-link-button { background:#dbe7f2; color:#071727; }"
+".link-brand { color:#ffffff; }"
+".link-brand-subtitle { color:#8eb8dd; }"
+".link-section-title { color:#f4f7fb; }"
+".link-section-summary { color:#82a8c9; }"
+".link-card { background:#0b2844; border-color:#285f8f; }"
+".link-card-kicker { color:#76a9d4; font-weight:800; }"
+".link-card-title { color:#ffffff; font-weight:800; }"
+".link-detail-label { color:#8eb0cc; }"
+".link-detail-value { color:#f4f7fb; font-weight:700; }"
+".link-card-note { color:#a8c2d8; }"
+".link-status-chip { border-color:#3d76a7; font-weight:700; }"
 ".state-success { color:#a8e0b9; border-color:#4f8c63; }"
-".state-warning { color:#e0c486; border-color:#8b7444; }";
+".state-warning { color:#f2cf8e; border-color:#9b7940; }";
 
 static const char *stage(const ProductContext *c){
     if(!c->connected) return "Not linked";

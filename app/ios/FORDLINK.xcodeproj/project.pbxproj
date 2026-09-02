@@ -330,7 +330,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.2.1;
+				MARKETING_VERSION = 0.2.2;
 				FORDLINK_SOURCE_REVISION = unavailable;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.github.InfiltratorProjects.FORDLINK";
@@ -374,7 +374,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.2.1;
+				MARKETING_VERSION = 0.2.2;
 				FORDLINK_SOURCE_REVISION = unavailable;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.github.InfiltratorProjects.FORDLINK";
 				PRODUCT_NAME = "$(TARGET_NAME)";
