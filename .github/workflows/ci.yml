@@ -13,7 +13,7 @@ concurrency:
 jobs:
   core:
     name: Portable C11 core
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, X64, linux-native]
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
@@ -32,7 +32,7 @@ jobs:
 
   linux-gui:
     name: Linux GTK4 GUI
-    runs-on: ubuntu-latest
+    runs-on: [self-hosted, Linux, X64, linux-native]
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
@@ -41,6 +41,7 @@ jobs:
       - run: |
           sudo apt-get update
           sudo apt-get install -y --no-install-recommends build-essential cmake dpkg-dev libgtk-4-dev libbluetooth-dev libusb-1.0-0-dev pkg-config xvfb
+        if: runner.environment == 'github-hosted'
       - run: cmake -S . -B build-linux -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr -DFORDLINK_BUILD_LINUX_GUI=ON -DBUILD_TESTING=OFF
       - run: cmake --build build-linux --parallel
       - name: Prove GUI launches and navigation is live
@@ -81,7 +82,7 @@ jobs:
 
   windows-gui:
     name: Windows Discover GUI
-    runs-on: windows-latest
+    runs-on: [self-hosted, Windows, ARM64, infiltrator-windows-arm64]
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
