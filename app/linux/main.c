@@ -267,23 +267,69 @@ static void append_settings(GtkWidget *body, ProductContext *context)
     gtk_box_append(GTK_BOX(body), card);
 }
 
+static void append_tests(GtkWidget *body, ProductContext *context)
+{
+    GtkWidget *card = link_gtk_card_new("TESTS", "Readiness and diagnostic checks");
+    link_gtk_card_append_status(
+        card, context->diagnostic_ready ? "DIAGNOSTICS READY" : stage(context),
+        context->diagnostic_ready ? "state-success" : "state-warning");
+    link_gtk_card_append_note(
+        card,
+        "Readiness, monitor results and verified manufacturer self-tests belong in this task.");
+    gtk_box_append(GTK_BOX(body), card);
+}
+
+static void append_services(GtkWidget *body, ProductContext *context)
+{
+    GtkWidget *card = link_gtk_card_new("SERVICES", "Vehicle procedures");
+    link_gtk_card_append_status(
+        card,
+        context->diagnostic_ready ? "NO VERIFIED PROCEDURE ENABLED" : "CONNECT TO EVALUATE SERVICES",
+        "state-warning");
+    link_gtk_card_append_note(
+        card,
+        "Only explicitly supported service procedures are presented here. Unverified operations remain unavailable.");
+    gtk_box_append(GTK_BOX(body), card);
+}
+
 static void render(size_t section, GtkWidget *body, void *opaque)
 {
     ProductContext *context = opaque;
     switch ((LinkWorkspaceSection)section) {
-    case LINK_WORKSPACE_VEHICLE: append_vehicle(body, context); break;
-    case LINK_WORKSPACE_OBD: break; /* LINK renders the common OBD workspace. */
-    case LINK_WORKSPACE_MODULES: append_modules(body, context); break;
-    case LINK_WORKSPACE_FAULTS: append_faults(body, context); break;
-    case LINK_WORKSPACE_LIVE_DATA:
-        append_live(body, context, "LIVE DATA", "Supported standard parameters"); break;
+    case LINK_WORKSPACE_VEHICLE:
+        append_vehicle(body, context);
+        append_modules(body, context);
+        break;
+    case LINK_WORKSPACE_FAULTS:
+        append_faults(body, context);
+        break;
     case LINK_WORKSPACE_TABLE:
-        append_live(body, context, "PARAMETER TABLE", "Dense live parameter table"); break;
-    case LINK_WORKSPACE_DASHBOARD: append_dashboard(body, context); break;
-    case LINK_WORKSPACE_GRAPHS: append_graphs(body, context); break;
-    case LINK_WORKSPACE_LOG: append_log(body, context); break;
-    case LINK_WORKSPACE_SETTINGS: append_settings(body, context); break;
-    case LINK_WORKSPACE_SECTION_COUNT: break;
+        append_live(body, context, "PARAMETER TABLE", "Dense live parameter table");
+        break;
+    case LINK_WORKSPACE_DASHBOARD:
+        append_dashboard(body, context);
+        break;
+    case LINK_WORKSPACE_GRAPHS:
+        append_graphs(body, context);
+        break;
+    case LINK_WORKSPACE_TESTS:
+        append_tests(body, context);
+        break;
+    case LINK_WORKSPACE_SERVICES:
+        append_services(body, context);
+        break;
+    case LINK_WORKSPACE_LOG:
+        append_log(body, context);
+        break;
+    case LINK_WORKSPACE_SETTINGS:
+        append_settings(body, context);
+        break;
+    case LINK_WORKSPACE_SECTION_COUNT:
+        break;
+    case LINK_WORKSPACE_OBD:
+    case LINK_WORKSPACE_MODULES:
+    case LINK_WORKSPACE_LIVE_DATA:
+        break;
     }
 }
 
