@@ -13,6 +13,12 @@ final class ConnectionViewModel: NSObject, ObservableObject, @preconcurrency For
     @Published private(set) var pendingDTCs = [String]()
     @Published private(set) var permanentDTCs = [String]()
     @Published private(set) var readinessStatusText = "Not read"
+    @Published private(set) var readinessMonitorStatus = [String]()
+    @Published private(set) var freezeFrameContext = [String]()
+    @Published private(set) var diagnosticCapabilityText = "Unknown / probing"
+    @Published private(set) var diagnosticCapabilityDetailText = ""
+    @Published private(set) var standardResponderSummary = "0 physical responders"
+    @Published private(set) var supportedPIDSummary = "0 advertised PIDs"
     @Published private(set) var standardLiveRows = [String]()
     @Published private(set) var isActive = false
     @Published private(set) var isReady = false
@@ -59,6 +65,12 @@ final class ConnectionViewModel: NSObject, ObservableObject, @preconcurrency For
         pendingDTCs = controller.pendingDTCs
         permanentDTCs = controller.permanentDTCs
         readinessStatusText = controller.readinessStatusText
+        readinessMonitorStatus = controller.readinessMonitorStatus
+        freezeFrameContext = controller.freezeFrameContext
+        diagnosticCapabilityText = controller.diagnosticCapabilityText
+        diagnosticCapabilityDetailText = controller.diagnosticCapabilityDetailText
+        standardResponderSummary = controller.standardResponderSummary
+        supportedPIDSummary = controller.supportedPIDSummary
         standardLiveRows = controller.standardLiveValueRows
         isActive = controller.isActive
         isReady = controller.isReady
