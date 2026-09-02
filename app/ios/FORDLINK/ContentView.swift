@@ -183,36 +183,21 @@ struct ContentView: View {
 
     private var primaryGrid: some View {
         LinkDiagnosticGrid {
-            LinkHomeTile("OBD", "Common legacy, transitional and standard diagnostics", "cpu") {
-                LinkStandardObdView(snapshot: obdSnapshot)
-            }
-            LinkHomeTile("Faults", "Stored, pending and permanent fault memory", "exclamationmark.triangle.fill") {
-                ProductFaultsView(model: model)
-            }
-            LinkHomeTile("Live Data", "Advertised standard sensors and measurements", "waveform.path.ecg") {
-                ProductLiveDataView(model: model)
-            }
-            LinkHomeTile("Vehicle", "VIN, adapter and diagnostic identity", "car.side.fill") {
-                ProductVehicleView(model: model)
-            }
-            LinkHomeTile("Modules", "Standard responder inventory and capability", "square.stack.3d.up.fill") {
-                ProductModulesView(model: model)
-            }
+            LinkTaskTile(.vehicle) { ProductVehicleView(model: model) }
+            LinkTaskTile(.log) { ProductEvidenceView(model: model) }
+            LinkTaskTile(.errors) { ProductFaultsView(model: model) }
+            LinkTaskTile(.dashboard) { ProductDashboardView(model: model) }
+            LinkTaskTile(.table) { ProductTableView(model: model) }
+            LinkTaskTile(.graph) { ProductGraphView(model: model) }
+            LinkTaskTile(.tests) { ProductTestsView(model: model) }
+            LinkTaskTile(.services) { ProductServicesView(model: model) }
         }
     }
 
     private var supportingTools: some View {
         LinkPanel {
             VStack(alignment: .leading, spacing: 7) {
-                LinkSectionHeader(title: "Tools", kicker: "Secondary")
-                LinkCompactLink("Dashboard", "At-a-glance diagnostic measurements", "gauge.with.dots.needle.67percent") {
-                    ProductDashboardView(model: model)
-                }
-                Divider().overlay(ProductTheme.border.opacity(0.55))
-                LinkCompactLink("Evidence", "Session samples and CSV export", "doc.text.magnifyingglass") {
-                    ProductEvidenceView(model: model)
-                }
-                Divider().overlay(ProductTheme.border.opacity(0.55))
+                LinkSectionHeader(title: "Settings", kicker: "Application")
                 LinkCompactLink("Settings", "Adapter and application information", "gearshape.fill") {
                     ProductSettingsView(model: model)
                 }
@@ -220,21 +205,7 @@ struct ContentView: View {
         }
     }
 
-    private var obdSnapshot: LinkStandardObdSnapshot {
-        LinkStandardObdSnapshot(
-            capability: model.diagnosticCapabilityText,
-            capabilityDetail: model.diagnosticCapabilityDetailText,
-            vin: model.vehicleVINText,
-            responderSummary: model.standardResponderSummary,
-            pidSummary: model.supportedPIDSummary,
-            readiness: model.readinessStatusText,
-            readinessMonitors: model.readinessMonitorStatus,
-            freezeFrame: model.freezeFrameContext,
-            storedDTCs: model.storedDTCs,
-            pendingDTCs: model.pendingDTCs,
-            permanentDTCs: model.permanentDTCs,
-            liveRows: model.standardLiveRows)
-    }
+
 }
 
 private struct ProductVehicleView: View {
@@ -256,6 +227,26 @@ private struct ProductVehicleView: View {
                     productValueRow("ELM identity", model.adapterIdentifier, icon: "memorychip")
                     productDivider
                     productValueRow("State", model.statusText, icon: "checkmark.seal")
+                }
+                LinkLabeledPanel(title: "Control units", systemImage: "square.stack.3d.up.fill") {
+                    NavigationLink {
+                        ProductModulesView(model: model)
+                    } label: {
+                        HStack {
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text("Responder and module inventory")
+                                    .font(.headline)
+                                    .foregroundStyle(ProductTheme.primary)
+                                Text("Open standard responders and manufacturer capability details")
+                                    .font(.caption)
+                                    .foregroundStyle(ProductTheme.secondary)
+                            }
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .foregroundStyle(ProductTheme.accent)
+                        }
+                    }
+                    .buttonStyle(.plain)
                 }
             }
             .padding(16)
@@ -295,7 +286,7 @@ private struct ProductFaultsView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 15) {
-                LinkLabeledPanel(title: "Fault memory", systemImage: "exclamationmark.triangle.fill") {
+                LinkLabeledPanel(title: "Errors", systemImage: "exclamationmark.triangle.fill") {
                     HStack {
                         Text(model.faultScanStatusText)
                             .font(.subheadline)
@@ -312,7 +303,7 @@ private struct ProductFaultsView: View {
             }
             .padding(16)
         }
-        .productDiagnosticScreen("Faults")
+        .productDiagnosticScreen("Errors")
     }
 
     @ViewBuilder
@@ -337,13 +328,13 @@ private struct ProductFaultsView: View {
     }
 }
 
-private struct ProductLiveDataView: View {
+private struct ProductTableView: View {
     @ObservedObject var model: ConnectionViewModel
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 15) {
-                LinkLabeledPanel(title: "Live data", systemImage: "waveform.path.ecg") {
+                LinkLabeledPanel(title: "Table", systemImage: "waveform.path.ecg") {
                     if model.standardLiveRows.isEmpty {
                         Text(model.isActive ? "Waiting for advertised standard parameters and samples." : "Connect to populate supported standard live data.")
                             .font(.subheadline)
@@ -360,7 +351,7 @@ private struct ProductLiveDataView: View {
             }
             .padding(16)
         }
-        .productDiagnosticScreen("Live Data")
+        .productDiagnosticScreen("Table")
     }
 }
 
@@ -436,7 +427,102 @@ private struct ProductEvidenceView: View {
             }
             .padding(16)
         }
-        .productDiagnosticScreen("Evidence")
+        .productDiagnosticScreen("Log")
+    }
+}
+
+private struct ProductGraphView: View {
+    @ObservedObject var model: ConnectionViewModel
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 15) {
+                LinkLabeledPanel(title: "Graph", systemImage: "chart.xyaxis.line") {
+                    productValueRow("Recorded samples", "\(model.recordedSampleCount)", icon: "waveform")
+                    productDivider
+                    if model.standardLiveRows.isEmpty {
+                        Text("Collect live samples to populate graphable parameters.")
+                            .font(.subheadline)
+                            .foregroundStyle(ProductTheme.secondary)
+                    } else {
+                        ForEach(Array(model.standardLiveRows.prefix(6)), id: \.self) { row in
+                            Text(row)
+                                .font(.subheadline.monospacedDigit())
+                                .foregroundStyle(ProductTheme.primary)
+                        }
+                    }
+                    Text("This task is reserved for time-series presentation from LINK telemetry history; no synthetic trace is drawn.")
+                        .font(.caption)
+                        .foregroundStyle(ProductTheme.secondary)
+                }
+            }
+            .padding(16)
+        }
+        .productDiagnosticScreen("Graph")
+    }
+}
+
+private struct ProductTestsView: View {
+    @ObservedObject var model: ConnectionViewModel
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 15) {
+                LinkLabeledPanel(title: "Readiness", systemImage: "checkmark.square.fill") {
+                    productValueRow("Status", model.readinessStatusText, icon: "checklist")
+                    if model.readinessMonitorStatus.isEmpty {
+                        Text("No readiness-monitor detail has been returned yet.")
+                            .font(.subheadline)
+                            .foregroundStyle(ProductTheme.secondary)
+                    } else {
+                        ForEach(model.readinessMonitorStatus, id: \.self) { row in
+                            Text(row).font(.subheadline).foregroundStyle(ProductTheme.primary)
+                        }
+                    }
+                }
+                LinkLabeledPanel(title: "Freeze-frame context", systemImage: "camera.metering.matrix") {
+                    if model.freezeFrameContext.isEmpty {
+                        Text("No standard freeze-frame context captured.")
+                            .font(.subheadline)
+                            .foregroundStyle(ProductTheme.secondary)
+                    } else {
+                        ForEach(model.freezeFrameContext, id: \.self) { row in
+                            Text(row).font(.subheadline).foregroundStyle(ProductTheme.primary)
+                        }
+                    }
+                }
+                LinkLabeledPanel(title: "Additional tests", systemImage: "checkmark.seal") {
+                    Text("Verified standard monitor results and manufacturer self-tests belong here as support is added.")
+                        .font(.caption)
+                        .foregroundStyle(ProductTheme.secondary)
+                }
+            }
+            .padding(16)
+        }
+        .productDiagnosticScreen("Tests")
+    }
+}
+
+private struct ProductServicesView: View {
+    @ObservedObject var model: ConnectionViewModel
+
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 15) {
+                LinkLabeledPanel(title: "Services", systemImage: "wrench.and.screwdriver.fill") {
+                    Text(model.isActive
+                         ? "No verified service procedure is enabled for this session."
+                         : "Connect to evaluate supported service procedures.")
+                        .font(.headline)
+                        .foregroundStyle(ProductTheme.primary)
+                    Text("Only explicitly supported procedures are presented here. Unverified operations remain unavailable.")
+                        .font(.caption)
+                        .foregroundStyle(ProductTheme.secondary)
+                }
+            }
+            .padding(16)
+        }
+        .productDiagnosticScreen("Services")
     }
 }
 
