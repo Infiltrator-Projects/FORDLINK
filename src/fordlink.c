@@ -12,11 +12,12 @@
 #include "link/src/core/diagnostic_request.c"
 #include "link/src/core/doip.c"
 #include "link/src/core/diagnostic_flow.c"
+#include "link/src/core/diagnostic_capability.c"
 #include "link/src/core/isotp.c"
 #include "link/src/core/parameter.c"
 #include "link/src/core/scheduler.c"
 #ifndef LINK_SOURCE_REVISION
-#define LINK_SOURCE_REVISION "a945483748544ed209b78c8c1259fe9ad17e8101"
+#define LINK_SOURCE_REVISION "12008c6ef866c831e9c7198100469b1463e1ee64"
 #define FORDLINK_DEFINED_LINK_SOURCE_REVISION 1
 #endif
 #include "link/src/core/telemetry.c"
