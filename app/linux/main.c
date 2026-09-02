@@ -11,11 +11,14 @@
 #include <string.h>
 
 typedef struct {
-    bool connected, diagnostic_valid, diagnostic_ready;
+    bool connected;
+    bool diagnostic_valid;
+    bool diagnostic_ready;
     char adapter_identity[160];
     LinkDiagnosticFlow diagnostic;
     bool sample_valid[256];
     LinkObd2Sample samples[256];
+    size_t live_sample_count;
 } ProductContext;
 
 static const char css[] =
@@ -36,51 +39,303 @@ static const char css[] =
 ".state-success { color:#a8e0b9; border-color:#4f8c63; }"
 ".state-warning { color:#f2cf8e; border-color:#9b7940; }";
 
-static const char *stage(const ProductContext *c){
-    if(!c->connected) return "Not linked";
-    if(!c->diagnostic_valid) return "Starting diagnostics";
-    if(c->diagnostic.stage==LINK_DIAGNOSTIC_FLOW_FAILED) return "Diagnostic session failed";
-    if(c->diagnostic_ready) return "Live diagnostics active";
-    return link_diagnostic_flow_stage_name(c->diagnostic.stage);
+static const char *stage(const ProductContext *context)
+{
+    if (!context->connected) return "Not linked";
+    if (!context->diagnostic_valid) return "Starting diagnostics";
+    if (context->diagnostic.stage == LINK_DIAGNOSTIC_FLOW_FAILED)
+        return "Diagnostic session failed";
+    if (context->diagnostic_ready) return "Live diagnostics active";
+    return link_diagnostic_flow_stage_name(context->diagnostic.stage);
 }
-static size_t pids(const LinkObd2PidSet *s){size_t n=0;for(unsigned p=1;p<256;p++)if(link_obd2_pid_set_contains(s,(uint8_t)p))n++;return n;}
-static void dtcs(GtkWidget *card,const char *prefix,const LinkObd2DtcList *l){
-    if(l->count==0){char k[48];snprintf(k,sizeof k,"%s faults",prefix);link_gtk_card_append_detail(card,k,"None reported");return;}
-    for(size_t i=0;i<l->count;i++){char k[48];snprintf(k,sizeof k,"%s %zu",prefix,i+1);link_gtk_card_append_detail(card,k,l->entries[i].code);}
+
+static size_t pid_count(const LinkObd2PidSet *set)
+{
+    size_t count = 0U;
+    unsigned int pid;
+    for (pid = 1U; pid < 256U; ++pid)
+        if (link_obd2_pid_set_contains(set, (uint8_t)pid)) ++count;
+    return count;
 }
-static void vehicle(GtkWidget *b,ProductContext *c){
-    GtkWidget *v=link_gtk_card_new("VEHICLE","Ford diagnostic identity");
-    GtkWidget *x=link_gtk_card_new("CONNECTION","LINK adapter and standards session");
-    const char *vin=c->diagnostic_valid?link_diagnostic_flow_standard_vin(&c->diagnostic):NULL;
-    link_gtk_card_append_detail(v,"Manufacturer","Ford");
-    link_gtk_card_append_detail(v,"VIN",vin&&*vin?vin:"Waiting for SAE Mode 09 VIN");
-    link_gtk_card_append_detail(v,"Standards core","LINK · SAE J1979 / OBD-II / ISO-TP / UDS");
-    link_gtk_card_append_status(x,c->connected?"LINKED":"NOT LINKED",c->connected?"state-success":"state-warning");
-    link_gtk_card_append_detail(x,"Adapter",c->adapter_identity[0]?c->adapter_identity:"Select an adapter above and press LINK UP");
-    link_gtk_card_append_detail(x,"Diagnostic state",stage(c));
-    link_gtk_card_append_note(x,"FORDLINK is GUI-first. LINK owns the standards transport and read-only diagnostic flow; manufacturer-specific claims remain evidence-gated.");
-    gtk_box_append(GTK_BOX(b),v);gtk_box_append(GTK_BOX(b),x);
+
+static void format_sample(const LinkObd2Sample *sample, char *out, size_t size)
+{
+    const char *unit = link_obd2_unit_name(sample->unit);
+    (void)snprintf(out, size, "%.3f%s%s", sample->value,
+                   unit != NULL && unit[0] != '\0' ? " " : "",
+                   unit != NULL ? unit : "");
 }
-static void modules(GtkWidget *b,ProductContext *c){
-    GtkWidget *card=link_gtk_card_new("MODULE RESPONDERS","Physical SAE responders seen during capability discovery");
-    if(!c->diagnostic_valid||c->diagnostic.supported_pid_responders.count==0)link_gtk_card_append_status(card,"No responder inventory yet","state-warning");
-    else for(size_t i=0;i<c->diagnostic.supported_pid_responders.count;i++){const LinkObd2ResponderPidSet *r=&c->diagnostic.supported_pid_responders.entries[i];char k[48],v[128];snprintf(k,sizeof k,"ECU %zu",i+1);snprintf(v,sizeof v,"%s CAN 0x%X · %zu advertised PIDs",r->extended_id?"29-bit":"11-bit",(unsigned)r->responder_id,pids(&r->supported_pids));link_gtk_card_append_detail(card,k,v);}
-    link_gtk_card_append_note(card,"Desktop Research will extend this with bounded read-only manufacturer discovery; silence is never treated as an identity.");
-    gtk_box_append(GTK_BOX(b),card);
+
+static void append_dtcs(GtkWidget *card, const char *prefix,
+                        const LinkObd2DtcList *list)
+{
+    size_t index;
+    if (list->count == 0U) {
+        char key[48];
+        (void)snprintf(key, sizeof(key), "%s faults", prefix);
+        link_gtk_card_append_detail(card, key, "None reported");
+        return;
+    }
+    for (index = 0U; index < list->count; ++index) {
+        char key[48];
+        (void)snprintf(key, sizeof(key), "%s %zu", prefix, index + 1U);
+        link_gtk_card_append_detail(card, key, list->entries[index].code);
+    }
 }
-static void faults(GtkWidget *b,ProductContext *c){
-    GtkWidget *card=link_gtk_card_new("FAULT MEMORY","Stored, pending and permanent SAE OBD-II DTCs");
-    if(!c->diagnostic_valid)link_gtk_card_append_status(card,"Not scanned","state-warning");
-    else{dtcs(card,"Stored",&c->diagnostic.stored_dtcs);dtcs(card,"Pending",&c->diagnostic.pending_dtcs);dtcs(card,"Permanent",&c->diagnostic.permanent_dtcs);}
-    gtk_box_append(GTK_BOX(b),card);
+
+static void append_vehicle(GtkWidget *body, ProductContext *context)
+{
+    GtkWidget *vehicle = link_gtk_card_new("VEHICLE", "Ford diagnostic identity");
+    GtkWidget *connection = link_gtk_card_new("CONNECTION", "LINK adapter and diagnostic session");
+    const char *vin = context->diagnostic_valid
+        ? link_diagnostic_flow_standard_vin(&context->diagnostic) : NULL;
+
+    link_gtk_card_append_detail(vehicle, "Manufacturer", "Ford");
+    link_gtk_card_append_detail(vehicle, "VIN",
+        vin != NULL && vin[0] != '\0' ? vin : "Waiting for SAE Mode 09 VIN");
+    link_gtk_card_append_detail(vehicle, "Standards core",
+        "LINK · SAE J1979 / OBD-II / ISO-TP / UDS");
+
+    link_gtk_card_append_status(connection,
+        context->connected ? "LINKED" : "NOT LINKED",
+        context->connected ? "state-success" : "state-warning");
+    link_gtk_card_append_detail(connection, "Adapter",
+        context->adapter_identity[0] != '\0'
+            ? context->adapter_identity
+            : "Select an adapter above and press LINK UP");
+    link_gtk_card_append_detail(connection, "Diagnostic state", stage(context));
+    link_gtk_card_append_note(connection,
+        "LINK owns the common standards flow. Ford-specific claims remain evidence-gated.");
+
+    gtk_box_append(GTK_BOX(body), vehicle);
+    gtk_box_append(GTK_BOX(body), connection);
 }
-static void live(GtkWidget *b,ProductContext *c,const char *k,const char *t){
-    GtkWidget *card=link_gtk_card_new(k,t);size_t n=0;
-    for(unsigned p=1;p<256;p++){if(!c->diagnostic_valid||!link_obd2_pid_set_contains(&c->diagnostic.supported_pids,(uint8_t)p))continue;const LinkObd2PidDefinition *d=link_obd2_pid_definition(1,(uint8_t)p);char key[180],val[96];snprintf(key,sizeof key,"PID 0x%02X · %s",p,d&&d->name?d->name:link_obd2_pid_name((uint8_t)p));if(c->sample_valid[p]){const char *u=link_obd2_unit_name(c->samples[p].unit);snprintf(val,sizeof val,"%.3f%s%s",c->samples[p].value,u&&*u?" ":"",u?u:"");}else snprintf(val,sizeof val,"Supported · waiting for sample");link_gtk_card_append_detail(card,key,val);n++;}
-    if(!n)link_gtk_card_append_status(card,"No live PID data yet","state-warning");gtk_box_append(GTK_BOX(b),card);
+
+static void append_modules(GtkWidget *body, ProductContext *context)
+{
+    GtkWidget *card = link_gtk_card_new(
+        "MODULE RESPONDERS",
+        "Physical standard responders seen during capability discovery");
+    if (!context->diagnostic_valid ||
+        context->diagnostic.supported_pid_responders.count == 0U) {
+        link_gtk_card_append_status(card, "No responder inventory yet", "state-warning");
+    } else {
+        size_t index;
+        for (index = 0U;
+             index < context->diagnostic.supported_pid_responders.count;
+             ++index) {
+            const LinkObd2ResponderPidSet *responder =
+                &context->diagnostic.supported_pid_responders.entries[index];
+            char key[48];
+            char value[128];
+            (void)snprintf(key, sizeof(key), "ECU %zu", index + 1U);
+            (void)snprintf(value, sizeof(value),
+                "%s CAN 0x%X · %zu advertised PIDs",
+                responder->extended_id ? "29-bit" : "11-bit",
+                (unsigned int)responder->responder_id,
+                pid_count(&responder->supported_pids));
+            link_gtk_card_append_detail(card, key, value);
+        }
+    }
+    link_gtk_card_append_note(card,
+        "Ford-specific module discovery is added only when its protocol and identity evidence are verified.");
+    gtk_box_append(GTK_BOX(body), card);
 }
-static void generic(GtkWidget *b,ProductContext *c,const char *k,const char *t,const char *note){GtkWidget *card=link_gtk_card_new(k,t);link_gtk_card_append_detail(card,"Connection",c->connected?"Linked":"Offline");link_gtk_card_append_detail(card,"Diagnostic state",stage(c));link_gtk_card_append_note(card,note);gtk_box_append(GTK_BOX(b),card);}
-static void render(size_t s,GtkWidget *b,void *ctx){ProductContext *c=ctx;switch((LinkWorkspaceSection)s){case LINK_WORKSPACE_VEHICLE:vehicle(b,c);break;case LINK_WORKSPACE_MODULES:modules(b,c);break;case LINK_WORKSPACE_FAULTS:faults(b,c);break;case LINK_WORKSPACE_LIVE_DATA:live(b,c,"LIVE DATA","Supported SAE parameters");break;case LINK_WORKSPACE_TABLE:live(b,c,"TABLE","Dense live parameter table");break;case LINK_WORKSPACE_DASHBOARD:generic(b,c,"DASHBOARD","Diagnostic overview","Dashboard tiles use the same LINK live samples; there is no CLI product mode.");break;case LINK_WORKSPACE_GRAPHS:generic(b,c,"GRAPHS","Time-series workspace","Graphs consume recorded LINK telemetry and will expand with verified manufacturer data.");break;case LINK_WORKSPACE_LOG:generic(b,c,"LOG","Diagnostic evidence","Use SAVE SESSION to preserve the raw investigation record.");break;case LINK_WORKSPACE_SETTINGS:generic(b,c,"SETTINGS","FORDLINK preferences","Adapter and diagnostic behaviour are shared through LINK.");break;default:break;}}
-static void conn(LinkTransport *t,bool connected,const char *id,void *ctx){ProductContext *c=ctx;(void)t;c->connected=connected;snprintf(c->adapter_identity,sizeof c->adapter_identity,"%s",id?id:"");if(!connected){c->diagnostic_valid=false;c->diagnostic_ready=false;memset(c->sample_valid,0,sizeof c->sample_valid);}}
-static void diag(const LinkDiagnosticFlow *f,const LinkDiagnosticFlowEvent *e,bool active,bool ready,void *ctx){ProductContext *c=ctx;(void)active;if(f){c->diagnostic=*f;c->diagnostic_valid=true;}c->diagnostic_ready=ready;if(e&&e->kind==LINK_DIAGNOSTIC_FLOW_EVENT_LIVE_SAMPLE){uint8_t p=e->sample.pid;c->samples[p]=e->sample;c->sample_valid[p]=true;}}
-int main(int argc,char **argv){ProductContext c={0};LinkGtkShellDescriptor d={0};d.app_id="com.github.InfiltratorProjects.FORDLINK";d.window_title="FORDLINK · Ford Diagnostics";d.brand_name="FORDLINK";d.brand_subtitle="Ford · LINK standards diagnostics";d.version=fordlink_version();d.css=css;d.render_section=render;d.connection_changed=conn;d.diagnostic_changed=diag;d.use_client_side_titlebar=true;d.context=&c;return link_gtk_shell_run(argc,argv,&d);}
+
+static void append_faults(GtkWidget *body, ProductContext *context)
+{
+    GtkWidget *card = link_gtk_card_new(
+        "FAULT MEMORY",
+        "Stored, pending and permanent standard diagnostic faults");
+    if (!context->diagnostic_valid) {
+        link_gtk_card_append_status(card, "Not scanned", "state-warning");
+    } else {
+        append_dtcs(card, "Stored", &context->diagnostic.stored_dtcs);
+        append_dtcs(card, "Pending", &context->diagnostic.pending_dtcs);
+        append_dtcs(card, "Permanent", &context->diagnostic.permanent_dtcs);
+    }
+    gtk_box_append(GTK_BOX(body), card);
+}
+
+static void append_live(GtkWidget *body, ProductContext *context,
+                        const char *kicker, const char *title)
+{
+    GtkWidget *card = link_gtk_card_new(kicker, title);
+    size_t shown = 0U;
+    unsigned int pid;
+    for (pid = 1U; pid < 256U; ++pid) {
+        const LinkObd2PidDefinition *definition;
+        char key[180];
+        char value[96];
+        if (!context->diagnostic_valid ||
+            !link_obd2_pid_set_contains(
+                &context->diagnostic.supported_pids, (uint8_t)pid))
+            continue;
+        definition = link_obd2_pid_definition(1U, (uint8_t)pid);
+        (void)snprintf(key, sizeof(key), "PID 0x%02X · %s",
+            pid,
+            definition != NULL && definition->name != NULL
+                ? definition->name : link_obd2_pid_name((uint8_t)pid));
+        if (context->sample_valid[pid])
+            format_sample(&context->samples[pid], value, sizeof(value));
+        else
+            (void)snprintf(value, sizeof(value), "Supported · waiting for sample");
+        link_gtk_card_append_detail(card, key, value);
+        ++shown;
+    }
+    if (shown == 0U)
+        link_gtk_card_append_status(card, "No live PID data yet", "state-warning");
+    gtk_box_append(GTK_BOX(body), card);
+}
+
+static void append_dashboard(GtkWidget *body, ProductContext *context)
+{
+    static const uint8_t dashboard_pids[] = {0x0cU, 0x0dU, 0x05U, 0x10U, 0x11U, 0x42U};
+    GtkWidget *card = link_gtk_card_new("AT-A-GLANCE", "Ford powertrain dashboard");
+    size_t index;
+
+    link_gtk_card_append_status(card,
+        context->diagnostic_ready ? "LIVE SAMPLES" : stage(context),
+        context->diagnostic_ready ? "state-success" : "state-warning");
+
+    for (index = 0U; index < sizeof(dashboard_pids) / sizeof(dashboard_pids[0]); ++index) {
+        uint8_t pid = dashboard_pids[index];
+        const LinkObd2PidDefinition *definition =
+            link_obd2_pid_definition(1U, pid);
+        const char *name = definition != NULL && definition->name != NULL
+            ? definition->name : link_obd2_pid_name(pid);
+        char value[96];
+        if (context->sample_valid[pid])
+            format_sample(&context->samples[pid], value, sizeof(value));
+        else if (context->diagnostic_valid &&
+                 !link_obd2_pid_set_contains(&context->diagnostic.supported_pids, pid))
+            (void)snprintf(value, sizeof(value), "Not supported");
+        else
+            (void)snprintf(value, sizeof(value), "Waiting");
+        link_gtk_card_append_detail(card, name, value);
+    }
+    gtk_box_append(GTK_BOX(body), card);
+}
+
+static void append_graphs(GtkWidget *body, ProductContext *context)
+{
+    GtkWidget *card = link_gtk_card_new("INSTRUMENT TRACES", "Signal history");
+    char samples[64];
+    char channels[64];
+    size_t channel_count = 0U;
+    unsigned int pid;
+    for (pid = 1U; pid < 256U; ++pid)
+        if (context->sample_valid[pid]) ++channel_count;
+    (void)snprintf(samples, sizeof(samples), "%zu samples observed",
+                   context->live_sample_count);
+    (void)snprintf(channels, sizeof(channels), "%zu live channels",
+                   channel_count);
+    link_gtk_card_append_detail(card, "Current session", samples);
+    link_gtk_card_append_detail(card, "Sampled parameters", channels);
+    link_gtk_card_append_detail(card, "Source", "Real LINK telemetry only");
+    link_gtk_card_append_note(card,
+        "Signal history is retained by the shared telemetry/evidence layer; synthetic traces are never generated.");
+    gtk_box_append(GTK_BOX(body), card);
+}
+
+static void append_log(GtkWidget *body, ProductContext *context)
+{
+    GtkWidget *card = link_gtk_card_new("SESSION RECORDER", "Diagnostic evidence");
+    char samples[64];
+    (void)snprintf(samples, sizeof(samples), "%zu live samples",
+                   context->live_sample_count);
+    link_gtk_card_append_status(card, stage(context),
+        context->diagnostic_ready ? "state-success" : "state-warning");
+    link_gtk_card_append_detail(card, "Telemetry", samples);
+    link_gtk_card_append_detail(card, "Evidence path", "LINK shared recorder");
+    link_gtk_card_append_note(card,
+        "Use SAVE SESSION in the shared shell to preserve the timestamped investigation record.");
+    gtk_box_append(GTK_BOX(body), card);
+}
+
+static void append_settings(GtkWidget *body, ProductContext *context)
+{
+    GtkWidget *card = link_gtk_card_new("FORDLINK", "Application and adapter information");
+    link_gtk_card_append_detail(card, "Version", fordlink_version());
+    link_gtk_card_append_detail(card, "Product", "Ford diagnostics");
+    link_gtk_card_append_detail(card, "Adapter", context->adapter_identity[0] != '\0'
+        ? context->adapter_identity : "No adapter connected");
+    link_gtk_card_append_detail(card, "Standards core", "LINK");
+    link_gtk_card_append_detail(card, "Diagnostic mode", "Read-only discovery and live data");
+    link_gtk_card_append_detail(card, "Manufacturer layer",
+        "Ford-specific knowledge remains evidence-backed");
+    gtk_box_append(GTK_BOX(body), card);
+}
+
+static void render(size_t section, GtkWidget *body, void *opaque)
+{
+    ProductContext *context = opaque;
+    switch ((LinkWorkspaceSection)section) {
+    case LINK_WORKSPACE_VEHICLE: append_vehicle(body, context); break;
+    case LINK_WORKSPACE_OBD: break; /* LINK renders the common OBD workspace. */
+    case LINK_WORKSPACE_MODULES: append_modules(body, context); break;
+    case LINK_WORKSPACE_FAULTS: append_faults(body, context); break;
+    case LINK_WORKSPACE_LIVE_DATA:
+        append_live(body, context, "LIVE DATA", "Supported standard parameters"); break;
+    case LINK_WORKSPACE_TABLE:
+        append_live(body, context, "PARAMETER TABLE", "Dense live parameter table"); break;
+    case LINK_WORKSPACE_DASHBOARD: append_dashboard(body, context); break;
+    case LINK_WORKSPACE_GRAPHS: append_graphs(body, context); break;
+    case LINK_WORKSPACE_LOG: append_log(body, context); break;
+    case LINK_WORKSPACE_SETTINGS: append_settings(body, context); break;
+    case LINK_WORKSPACE_SECTION_COUNT: break;
+    }
+}
+
+static void connection_changed(LinkTransport *transport, bool connected,
+                               const char *identity, void *opaque)
+{
+    ProductContext *context = opaque;
+    (void)transport;
+    context->connected = connected;
+    (void)snprintf(context->adapter_identity, sizeof(context->adapter_identity),
+                   "%s", identity != NULL ? identity : "");
+    if (!connected) {
+        context->diagnostic_valid = false;
+        context->diagnostic_ready = false;
+        context->live_sample_count = 0U;
+        memset(context->sample_valid, 0, sizeof(context->sample_valid));
+    }
+}
+
+static void diagnostic_changed(const LinkDiagnosticFlow *flow,
+                               const LinkDiagnosticFlowEvent *event,
+                               bool active, bool ready, void *opaque)
+{
+    ProductContext *context = opaque;
+    (void)active;
+    if (flow != NULL) {
+        context->diagnostic = *flow;
+        context->diagnostic_valid = true;
+    }
+    context->diagnostic_ready = ready;
+    if (event != NULL && event->kind == LINK_DIAGNOSTIC_FLOW_EVENT_LIVE_SAMPLE) {
+        uint8_t pid = event->sample.pid;
+        context->samples[pid] = event->sample;
+        context->sample_valid[pid] = true;
+        ++context->live_sample_count;
+    }
+}
+
+int main(int argc, char **argv)
+{
+    ProductContext context = {0};
+    LinkGtkShellDescriptor descriptor = {0};
+    descriptor.app_id = "com.github.InfiltratorProjects.FORDLINK";
+    descriptor.window_title = "FORDLINK · Ford Diagnostics";
+    descriptor.brand_name = "FORDLINK";
+    descriptor.brand_subtitle = "FORD · LINK DIAGNOSTICS";
+    descriptor.version = fordlink_version();
+    descriptor.css = css;
+    descriptor.render_section = render;
+    descriptor.connection_changed = connection_changed;
+    descriptor.diagnostic_changed = diagnostic_changed;
+    descriptor.use_client_side_titlebar = true;
+    descriptor.context = &context;
+    return link_gtk_shell_run(argc, argv, &descriptor);
+}
