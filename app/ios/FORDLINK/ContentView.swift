@@ -11,6 +11,34 @@ private enum ProductTheme {
     static let secondary = Color(red: 0.60, green: 0.75, blue: 0.87)
 }
 
+private let fordLinkTheme = LinkDiagnosticTheme(
+    backgroundTop: ProductTheme.backgroundTop,
+    backgroundMiddle: ProductTheme.panel,
+    backgroundBottom: ProductTheme.backgroundBottom,
+    panel: ProductTheme.panel,
+    panelRaised: ProductTheme.border.opacity(0.35),
+    primaryText: ProductTheme.primary,
+    secondaryText: ProductTheme.secondary,
+    mutedText: ProductTheme.secondary.opacity(0.72),
+    border: ProductTheme.border,
+    accent: ProductTheme.accent,
+    success: .green,
+    warning: .orange,
+    fault: .red,
+    typography: LinkDiagnosticTypography(
+        display: .system(size: 29, weight: .semibold),
+        body: .body,
+        bodyBold: .body.bold(),
+        subheadline: .subheadline,
+        subheadlineBold: .subheadline.bold(),
+        headline: .headline,
+        caption: .caption,
+        captionBold: .caption.bold(),
+        caption2: .caption2,
+        caption2Bold: .caption2.bold(),
+        title3: .title3,
+        title2: .title2.bold()))
+
 private struct Panel<Content: View>: View {
     let title: String
     let content: Content
@@ -79,6 +107,27 @@ struct ContentView: View {
                             .tint(ProductTheme.accent)
                         }
 
+                        Panel("OBD") {
+                            NavigationLink {
+                                LinkStandardObdView(snapshot: obdSnapshot)
+                            } label: {
+                                HStack {
+                                    VStack(alignment: .leading, spacing: 3) {
+                                        Text(model.diagnosticCapabilityText)
+                                            .font(.headline)
+                                            .foregroundStyle(ProductTheme.primary)
+                                        Text("Open LINK standard diagnostics")
+                                            .font(.caption)
+                                            .foregroundStyle(ProductTheme.secondary)
+                                    }
+                                    Spacer()
+                                    Image(systemName: "chevron.right")
+                                        .foregroundStyle(ProductTheme.accent)
+                                }
+                            }
+                            .buttonStyle(.plain)
+                        }
+
                         Panel("Vehicle") {
                             Text("VIN").font(.caption).foregroundStyle(ProductTheme.secondary)
                             Text(model.vehicleVINText).font(.body.monospaced())
@@ -125,7 +174,24 @@ struct ContentView: View {
             .foregroundStyle(ProductTheme.primary)
             .tint(ProductTheme.accent)
         }
+        .linkDiagnosticTheme(fordLinkTheme)
         .preferredColorScheme(.dark)
+    }
+
+    private var obdSnapshot: LinkStandardObdSnapshot {
+        LinkStandardObdSnapshot(
+            capability: model.diagnosticCapabilityText,
+            capabilityDetail: model.diagnosticCapabilityDetailText,
+            vin: model.vehicleVINText,
+            responderSummary: model.standardResponderSummary,
+            pidSummary: model.supportedPIDSummary,
+            readiness: model.readinessStatusText,
+            readinessMonitors: model.readinessMonitorStatus,
+            freezeFrame: model.freezeFrameContext,
+            storedDTCs: model.storedDTCs,
+            pendingDTCs: model.pendingDTCs,
+            permanentDTCs: model.permanentDTCs,
+            liveRows: model.standardLiveRows)
     }
 
     @ViewBuilder
