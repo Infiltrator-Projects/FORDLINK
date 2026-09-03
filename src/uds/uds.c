@@ -6,7 +6,6 @@
 #include "../link/src/uds/uds.c"
 #include "../link/src/uds/uds_services.c"
 #include "../link/src/uds/uds_server.c"
-#include "../link/src/uds/uds_dtc.c"
 #else
 typedef int fordlink_uds_translation_unit;
 #endif
