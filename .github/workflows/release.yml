@@ -140,7 +140,7 @@ jobs:
             exit 1
           fi
           gh release create "$tag" --target "$EXPECTED_SHA" --title "FORDLINK $VERSION" \
-            --notes "FORDLINK $VERSION replaces the CLI skeleton with real GUI applications on Linux, Windows and iPhone, all using the shared LINK standards diagnostic core." \
+            --notes "FORDLINK $VERSION adds the Ford network/module model, read-only Ford module census, module identity and DTC inventory, signal offset/scaling model for Table/Dashboard/Graph, and Ford test/service capability metadata across the LINK-backed Linux, Windows and iPhone applications." \
             release/*
 
       - name: Refresh and verify Infiltrator APT repository
