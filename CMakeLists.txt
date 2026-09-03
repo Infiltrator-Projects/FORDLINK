@@ -22,7 +22,14 @@ add_subdirectory(src/link EXCLUDE_FROM_ALL)
 set(BUILD_TESTING ON CACHE BOOL "" FORCE)
 enable_testing()
 
-add_library(fordlink-core STATIC src/fordlink.c src/network.c)
+add_library(fordlink-core STATIC
+  src/fordlink.c
+  src/network.c
+  src/module.c
+  src/identity.c
+  src/module_scan.c
+  src/signal.c
+  src/procedure.c)
 add_library(FORDLINK::Core ALIAS fordlink-core)
 target_include_directories(fordlink-core PUBLIC include)
 target_compile_definitions(fordlink-core PRIVATE FORDLINK_VERSION="${PROJECT_VERSION}")
@@ -41,6 +48,18 @@ add_test(NAME fordlink-generic-diagnostics COMMAND fordlink-generic-diagnostics)
 add_executable(fordlink-network tests/test_network.c)
 target_link_libraries(fordlink-network PRIVATE FORDLINK::Core)
 add_test(NAME fordlink-network COMMAND fordlink-network)
+add_executable(fordlink-modules tests/test_modules.c)
+target_link_libraries(fordlink-modules PRIVATE FORDLINK::Core)
+add_test(NAME fordlink-modules COMMAND fordlink-modules)
+add_executable(fordlink-module-scan tests/test_module_scan.c)
+target_link_libraries(fordlink-module-scan PRIVATE FORDLINK::Core)
+add_test(NAME fordlink-module-scan COMMAND fordlink-module-scan)
+add_executable(fordlink-signal tests/test_signal.c)
+target_link_libraries(fordlink-signal PRIVATE FORDLINK::Core)
+add_test(NAME fordlink-signal COMMAND fordlink-signal)
+add_executable(fordlink-procedure tests/test_procedure.c)
+target_link_libraries(fordlink-procedure PRIVATE FORDLINK::Core)
+add_test(NAME fordlink-procedure COMMAND fordlink-procedure)
 
 option(FORDLINK_BUILD_LINUX_GUI "Build native GTK4 GUI" OFF)
 option(FORDLINK_BUILD_WINDOWS_DISCOVER "Build Win32 Discover GUI" ${WIN32})
@@ -68,7 +87,9 @@ if(FORDLINK_BUILD_LINUX_GUI)
   install(TARGETS fordlink RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
   install(FILES app/linux/assets/fordlink-emblem.png DESTINATION "${CMAKE_INSTALL_DATADIR}/pixmaps" RENAME fordlink.png)
   install(FILES app/linux/fordlink.desktop DESTINATION "${CMAKE_INSTALL_DATADIR}/applications")
-  install(FILES README.md docs/OBD2.md docs/GENERIC_BASELINE.md docs/FORD_NETWORKS.md DESTINATION "${CMAKE_INSTALL_DATADIR}/doc/fordlink")
+  install(FILES README.md docs/OBD2.md docs/GENERIC_BASELINE.md docs/FORD_NETWORKS.md
+    docs/FORD_MODULES.md docs/FORD_DATA_MODEL.md
+    DESTINATION "${CMAKE_INSTALL_DATADIR}/doc/fordlink")
   set(CPACK_GENERATOR "DEB")
   set(CPACK_PACKAGE_NAME "fordlink")
   set(CPACK_PACKAGE_VENDOR "Infiltrator Projects")

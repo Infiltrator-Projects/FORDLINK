@@ -41,6 +41,15 @@
 #include "link/src/elm327/probe.c"
 #include "link/src/elm327/session.c"
 #include "link/src/kwp2000/kwp2000.c"
+#include "link/src/discover/safety.c"
+#include "link/src/discover/ecu_probe.c"
+/* Xcode compiles one product-owned C translation unit. */
+#include "network.c"
+#include "module.c"
+#include "identity.c"
+#include "module_scan.c"
+#include "signal.c"
+#include "procedure.c"
 #endif
 const char *fordlink_product_name(void){return "FORDLINK";}
 const char *fordlink_brand_name(void){return "Ford";}

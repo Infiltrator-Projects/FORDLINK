@@ -146,7 +146,6 @@ jobs:
 
   iphone-gui:
     name: iPhone SwiftUI GUI
-    if: startsWith(github.event.head_commit.message, 'Release ')
     runs-on: macos-latest
     timeout-minutes: 30
     steps:

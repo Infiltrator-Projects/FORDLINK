@@ -4,6 +4,11 @@
 
 #include "fordlink/obd2.h"
 #include "fordlink/network.h"
+#include "fordlink/module.h"
+#include "fordlink/identity.h"
+#include "fordlink/module_scan.h"
+#include "fordlink/signal.h"
+#include "fordlink/procedure.h"
 #include "link/diagnostic_flow.h"
 #include "link/diagnostic_request.h"
 #include "link/discover.h"

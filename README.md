@@ -54,3 +54,24 @@ This structure was informed by observing how mature Ford diagnostic tools keep
 vehicle networks, module identity, live data, tests and service procedures
 separate. No proprietary FORScan code, module database, PID table or service
 definition is included. See `docs/FORD_NETWORKS.md`.
+
+## Ford manufacturer layer
+
+FORDLINK contains a product-owned Ford module catalogue, diagnostic endpoint
+candidates, a standards-based ECU identity DID catalogue, and a bounded
+read-only manufacturer scanner. The scanner uses LINK's ECU-probe machinery and
+safety policy: it can issue only UDS identity reads (0x22) and DTC inventory
+(0x19). Reset, security access, routine control, DTC clearing, configuration
+writes and programming remain blocked.
+
+The data model also includes a generic Ford signal descriptor for byte/bit
+offsets, scaling, units and Dashboard/Table/Graph presentation, plus a service
+and test capability taxonomy. Those structures are data-driven so verified Ford
+PIDs, DIDs, broadcast frames and procedures can be added without rewriting the
+UI or transport engine.
+
+The architecture is informed by observable behaviour in mature Ford diagnostic
+software, including FORScan Lite NG, but FORDLINK does not contain FORScan's
+native code, private database records, proprietary PID catalogue, security
+algorithms or procedure command tables. See `docs/FORD_MODULES.md` and
+`docs/FORD_DATA_MODEL.md`.
