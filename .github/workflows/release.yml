@@ -1,18 +1,24 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 name: FORDLINK Release
 on:
-  push:
-    branches: [main]
+  workflow_run:
+    workflows: ["FORDLINK CI"]
+    types: [completed]
 permissions:
   contents: read
 
 jobs:
   linux:
-    if: startsWith(github.event.head_commit.message, 'Release ')
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_branch == 'main' &&
+      startsWith(github.event.workflow_run.head_commit.message, 'Release ')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
+          ref: ${{ github.event.workflow_run.head_sha }}
           submodules: recursive
       - run: |
           sudo apt-get update
@@ -39,11 +45,16 @@ jobs:
           path: release/*
 
   windows:
-    if: startsWith(github.event.head_commit.message, 'Release ')
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_branch == 'main' &&
+      startsWith(github.event.workflow_run.head_commit.message, 'Release ')
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
+          ref: ${{ github.event.workflow_run.head_sha }}
           submodules: recursive
       - id: version
         shell: pwsh
@@ -62,12 +73,17 @@ jobs:
           path: release/*
 
   iphone:
-    if: startsWith(github.event.head_commit.message, 'Release ')
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_branch == 'main' &&
+      startsWith(github.event.workflow_run.head_commit.message, 'Release ')
     runs-on: macos-latest
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
+          ref: ${{ github.event.workflow_run.head_sha }}
           submodules: recursive
       - id: version
         run: echo "version=$(tr -d '[:space:]' < VERSION)" >> "$GITHUB_OUTPUT"
@@ -81,13 +97,18 @@ jobs:
   publish:
     name: Publish complete GUI release
     needs: [linux, windows, iphone]
-    if: startsWith(github.event.head_commit.message, 'Release ')
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_branch == 'main' &&
+      startsWith(github.event.workflow_run.head_commit.message, 'Release ')
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
+          ref: ${{ github.event.workflow_run.head_sha }}
           fetch-depth: 0
       - id: version
         run: echo "version=$(tr -d '[:space:]' < VERSION)" >> "$GITHUB_OUTPUT"
@@ -100,6 +121,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           VERSION: ${{ steps.version.outputs.version }}
+          EXPECTED_SHA: ${{ github.event.workflow_run.head_sha }}
         shell: bash
         run: |
           set -euo pipefail
@@ -110,18 +132,21 @@ jobs:
           test "$(dpkg-deb -f "release/FORDLINK-$VERSION-linux-amd64.deb" Version)" = "$VERSION"
           (cd release && sha256sum FORDLINK-* > SHA256SUMS.txt)
           tag="v$VERSION"
+          git fetch origin main --tags
+          test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+          test "$(git rev-parse origin/main)" = "$EXPECTED_SHA"
           if gh release view "$tag" >/dev/null 2>&1; then
             echo "$tag already exists; releases are immutable" >&2
             exit 1
           fi
-          gh release create "$tag" --target "$GITHUB_SHA" --title "FORDLINK $VERSION" \
+          gh release create "$tag" --target "$EXPECTED_SHA" --title "FORDLINK $VERSION" \
             --notes "FORDLINK $VERSION replaces the CLI skeleton with real GUI applications on Linux, Windows and iPhone, all using the shared LINK standards diagnostic core." \
             release/*
 
       - name: Refresh and verify Infiltrator APT repository
         env:
           DISPATCH_TOKEN: ${{ secrets.APT_REPOSITORY_DISPATCH_TOKEN }}
-          RELEASE_SHA: ${{ github.sha }}
+          RELEASE_SHA: ${{ github.event.workflow_run.head_sha }}
           VERSION: ${{ steps.version.outputs.version }}
           APP_ID: fordlink
         shell: bash
