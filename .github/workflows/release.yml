@@ -140,7 +140,7 @@ jobs:
             exit 1
           fi
           gh release create "$tag" --target "$EXPECTED_SHA" --title "FORDLINK $VERSION" \
-            --notes "FORDLINK $VERSION inherits LINK 0.14.85 shared Settings on iPhone: persistent language selection, System Default/Metric/US customary presentation units, unit-aware live data and graphs, while retaining FORDLINK Ford network/module discovery and manufacturer-specific capability layers." \
+            --notes "FORDLINK $VERSION consumes its pinned LINK release for shared diagnostics, language/unit capabilities, fault-scan state and common product surfaces, while retaining FORDLINK-owned Ford network/module discovery and manufacturer-specific capability layers." \
             release/*
 
       - name: Refresh and verify Infiltrator APT repository
