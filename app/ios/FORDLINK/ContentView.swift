@@ -608,10 +608,19 @@ private struct ProductSettingsView: View {
             selectedMeasurementID: Binding(
                 get: { model.selectedMeasurementID },
                 set: { model.selectMeasurementSystem($0) }),
+            preferFavouriteSignals: Binding(
+                get: { model.preferFavouriteSignals },
+                set: { model.setPreferFavouriteSignals($0) }),
+            showUnavailableParameters: Binding(
+                get: { model.showUnavailableParameters },
+                set: { model.setShowUnavailableParameters($0) }),
             productName: "FORDLINK",
             productVersion: model.versionText,
             adapterName: model.peripheralName,
-            coreSummary: "Shared diagnostics, language and measurement preferences")
+            adapterIdentity: model.adapterIdentifier,
+            connectionStatus: model.statusText,
+            bundleIdentifier: Bundle.main.bundleIdentifier ?? "Unknown",
+            coreSummary: "LINK 0.14.86 · shared Settings baseline from MBLINK")
     }
 }
 

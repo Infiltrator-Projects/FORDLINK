@@ -32,6 +32,8 @@ final class ConnectionViewModel: NSObject, ObservableObject, @preconcurrency For
     @Published private(set) var selectedLanguageID = "system"
     @Published private(set) var measurementOptions = [LinkSettingOption]()
     @Published private(set) var selectedMeasurementID = "system"
+    @Published private(set) var preferFavouriteSignals = true
+    @Published private(set) var showUnavailableParameters = true
     @Published private(set) var rpmDisplayUnit = "rpm"
     @Published private(set) var speedDisplayUnit = "km/h"
     @Published private(set) var coolantDisplayUnit = "degC"
@@ -73,6 +75,16 @@ final class ConnectionViewModel: NSObject, ObservableObject, @preconcurrency For
 
     func selectMeasurementSystem(_ id: String) {
         controller.setSelectedMeasurementSystemKey(id)
+        refresh()
+    }
+
+    func setPreferFavouriteSignals(_ enabled: Bool) {
+        controller.setPreferFavouriteSignals(enabled)
+        refresh()
+    }
+
+    func setShowUnavailableParameters(_ enabled: Bool) {
+        controller.setShowUnavailableParameters(enabled)
         refresh()
     }
 
@@ -129,6 +141,8 @@ final class ConnectionViewModel: NSObject, ObservableObject, @preconcurrency For
             controller.availableMeasurementSystemNames
         ).map { LinkSettingOption(id: $0.0, title: $0.1) }
         selectedMeasurementID = controller.selectedMeasurementSystemKey
+        preferFavouriteSignals = controller.preferFavouriteSignals
+        showUnavailableParameters = controller.showUnavailableParameters
 
         rpmDisplayUnit = controller.rpmDisplayUnit
         speedDisplayUnit = controller.speedDisplayUnit
