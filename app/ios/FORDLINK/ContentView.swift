@@ -74,6 +74,11 @@ struct ContentView: View {
             tools: { supportingTools })
             .linkDiagnosticTheme(productTheme)
             .linkDiagnosticLocalization { model.localizedText($0) }
+            .environment(\.locale, Locale(identifier: model.interfaceLocaleIdentifier))
+            .environment(
+                \.layoutDirection,
+                model.interfaceLocaleIdentifier.hasPrefix("ar")
+                    ? .rightToLeft : .leftToRight)
     }
 
     private var header: some View {
@@ -599,28 +604,53 @@ private struct ProductSettingsView: View {
     @ObservedObject var model: ConnectionViewModel
 
     var body: some View {
-        LinkDiagnosticSettingsView(
-            languageOptions: model.languageOptions,
-            selectedLanguageID: Binding(
-                get: { model.selectedLanguageID },
-                set: { model.selectLanguage($0) }),
-            measurementOptions: model.measurementOptions,
-            selectedMeasurementID: Binding(
-                get: { model.selectedMeasurementID },
-                set: { model.selectMeasurementSystem($0) }),
-            preferFavouriteSignals: Binding(
-                get: { model.preferFavouriteSignals },
-                set: { model.setPreferFavouriteSignals($0) }),
-            showUnavailableParameters: Binding(
-                get: { model.showUnavailableParameters },
-                set: { model.setShowUnavailableParameters($0) }),
-            productName: "FORDLINK",
-            productVersion: model.versionText,
-            adapterName: model.peripheralName,
-            adapterIdentity: model.adapterIdentifier,
-            connectionStatus: model.statusText,
-            bundleIdentifier: Bundle.main.bundleIdentifier ?? "Unknown",
-            coreSummary: "LINK 0.14.86 · shared Settings baseline from MBLINK")
+        ScrollView {
+            VStack(alignment: .leading, spacing: 15) {
+                LinkLabeledPanel(title: "FORDLINK", systemImage: "gearshape.fill") {
+                    productValueRow("Version", model.versionText, icon: "number.circle")
+                    productDivider
+                    productValueRow("Adapter", model.peripheralName, icon: "antenna.radiowaves.left.and.right")
+                    productDivider
+                    productValueRow("Standards core", "LINK · read-only diagnostic flow", icon: "shield.lefthalf.filled")
+                }
+
+                LinkLabeledPanel(title: "Language", systemImage: "globe") {
+                    Picker(
+                        "Language",
+                        selection: Binding(
+                            get: { model.selectedLanguageID },
+                            set: { model.selectLanguage($0) })
+                    ) {
+                        ForEach(Array(model.languageTags.indices), id: \.self) { index in
+                            let title = index < model.languageNames.count
+                                ? model.languageNames[index]
+                                : model.languageTags[index]
+                            Text(title).tag(model.languageTags[index])
+                        }
+                    }
+                    .pickerStyle(.menu)
+                }
+
+                LinkLabeledPanel(title: "Unit system", systemImage: "ruler") {
+                    Picker(
+                        "Unit system",
+                        selection: Binding(
+                            get: { model.selectedMeasurementID },
+                            set: { model.selectMeasurementSystem($0) })
+                    ) {
+                        ForEach(Array(model.measurementKeys.indices), id: \.self) { index in
+                            let title = index < model.measurementNames.count
+                                ? model.measurementNames[index]
+                                : model.measurementKeys[index]
+                            Text(title).tag(model.measurementKeys[index])
+                        }
+                    }
+                    .pickerStyle(.menu)
+                }
+            }
+            .padding(16)
+        }
+        .productDiagnosticScreen("Settings")
     }
 }
 

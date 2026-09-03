@@ -172,8 +172,6 @@
 - (NSArray<NSString *> *)availableMeasurementSystemKeys { return self.shared.availableMeasurementSystemKeys; }
 - (NSArray<NSString *> *)availableMeasurementSystemNames { return self.shared.availableMeasurementSystemNames; }
 - (NSString *)selectedMeasurementSystemKey { return self.shared.selectedMeasurementSystemKey; }
-- (BOOL)preferFavouriteSignals { return self.shared.preferFavouriteSignals; }
-- (BOOL)showUnavailableParameters { return self.shared.showUnavailableParameters; }
 - (NSString *)rpmDisplayUnit { return [self.shared displayUnitForPID:0x0C]; }
 - (NSString *)speedDisplayUnit { return [self.shared displayUnitForPID:0x0D]; }
 - (NSString *)coolantDisplayUnit { return [self.shared displayUnitForPID:0x05]; }
@@ -185,8 +183,6 @@
 - (NSString *)localizedTextForKey:(NSString *)key { return [self.shared localizedTextForKey:key]; }
 - (void)setSelectedLanguageTag:(NSString *)tag { [self.shared setSelectedLanguageTag:tag]; }
 - (void)setSelectedMeasurementSystemKey:(NSString *)key { [self.shared setSelectedMeasurementSystemKey:key]; }
-- (void)setPreferFavouriteSignals:(BOOL)enabled { [self.shared setPreferFavouriteSignals:enabled]; }
-- (void)setShowUnavailableParameters:(BOOL)enabled { [self.shared setShowUnavailableParameters:enabled]; }
 
 - (void)start
 {

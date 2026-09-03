@@ -40,8 +40,6 @@ NS_ASSUME_NONNULL_BEGIN
 @property(nonatomic, copy, readonly) NSArray<NSString *> *availableMeasurementSystemKeys;
 @property(nonatomic, copy, readonly) NSArray<NSString *> *availableMeasurementSystemNames;
 @property(nonatomic, copy, readonly) NSString *selectedMeasurementSystemKey;
-@property(nonatomic, readonly) BOOL preferFavouriteSignals;
-@property(nonatomic, readonly) BOOL showUnavailableParameters;
 @property(nonatomic, copy, readonly) NSString *rpmDisplayUnit;
 @property(nonatomic, copy, readonly) NSString *speedDisplayUnit;
 @property(nonatomic, copy, readonly) NSString *coolantDisplayUnit;
@@ -58,8 +56,6 @@ NS_ASSUME_NONNULL_BEGIN
 - (NSString *)localizedTextForKey:(NSString *)key;
 - (void)setSelectedLanguageTag:(NSString *)tag;
 - (void)setSelectedMeasurementSystemKey:(NSString *)key;
-- (void)setPreferFavouriteSignals:(BOOL)enabled;
-- (void)setShowUnavailableParameters:(BOOL)enabled;
 - (nullable NSData *)csvDataSnapshot;
 @end
 NS_ASSUME_NONNULL_END

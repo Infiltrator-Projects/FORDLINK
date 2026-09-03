@@ -28,12 +28,12 @@ final class ConnectionViewModel: NSObject, ObservableObject, @preconcurrency For
     @Published private(set) var speedHistory = [Double]()
     @Published private(set) var coolantHistory = [Double]()
     @Published private(set) var throttleHistory = [Double]()
-    @Published private(set) var languageOptions = [LinkSettingOption]()
-    @Published private(set) var selectedLanguageID = "system"
-    @Published private(set) var measurementOptions = [LinkSettingOption]()
-    @Published private(set) var selectedMeasurementID = "system"
-    @Published private(set) var preferFavouriteSignals = true
-    @Published private(set) var showUnavailableParameters = true
+    @Published private(set) var languageTags = [String]()
+    @Published private(set) var languageNames = [String]()
+    @Published private(set) var selectedLanguageID = "en-AU"
+    @Published private(set) var measurementKeys = [String]()
+    @Published private(set) var measurementNames = [String]()
+    @Published private(set) var selectedMeasurementID = "metric"
     @Published private(set) var rpmDisplayUnit = "rpm"
     @Published private(set) var speedDisplayUnit = "km/h"
     @Published private(set) var coolantDisplayUnit = "degC"
@@ -64,6 +64,8 @@ final class ConnectionViewModel: NSObject, ObservableObject, @preconcurrency For
     func connect() { if !isActive { controller.start() } }
     func disconnect() { controller.disconnect() }
 
+    var interfaceLocaleIdentifier: String { selectedLanguageID }
+
     func localizedText(_ key: String) -> String {
         controller.localizedText(forKey: key)
     }
@@ -75,16 +77,6 @@ final class ConnectionViewModel: NSObject, ObservableObject, @preconcurrency For
 
     func selectMeasurementSystem(_ id: String) {
         controller.setSelectedMeasurementSystemKey(id)
-        refresh()
-    }
-
-    func setPreferFavouriteSignals(_ enabled: Bool) {
-        controller.setPreferFavouriteSignals(enabled)
-        refresh()
-    }
-
-    func setShowUnavailableParameters(_ enabled: Bool) {
-        controller.setShowUnavailableParameters(enabled)
         refresh()
     }
 
@@ -131,18 +123,12 @@ final class ConnectionViewModel: NSObject, ObservableObject, @preconcurrency For
         coolantHistory = controller.coolantHistory.map { $0.doubleValue }
         throttleHistory = controller.throttleHistory.map { $0.doubleValue }
 
-        languageOptions = zip(
-            controller.availableLanguageTags,
-            controller.availableLanguageNames
-        ).map { LinkSettingOption(id: $0.0, title: $0.1) }
+        languageTags = controller.availableLanguageTags
+        languageNames = controller.availableLanguageNames
         selectedLanguageID = controller.selectedLanguageTag
-        measurementOptions = zip(
-            controller.availableMeasurementSystemKeys,
-            controller.availableMeasurementSystemNames
-        ).map { LinkSettingOption(id: $0.0, title: $0.1) }
+        measurementKeys = controller.availableMeasurementSystemKeys
+        measurementNames = controller.availableMeasurementSystemNames
         selectedMeasurementID = controller.selectedMeasurementSystemKey
-        preferFavouriteSignals = controller.preferFavouriteSignals
-        showUnavailableParameters = controller.showUnavailableParameters
 
         rpmDisplayUnit = controller.rpmDisplayUnit
         speedDisplayUnit = controller.speedDisplayUnit
