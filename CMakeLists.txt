@@ -120,4 +120,17 @@ if(FORDLINK_BUILD_WINDOWS_DISCOVER)
     PRODUCT_WEBSITE "https://github.com/Infiltrator-Projects/FORDLINK"
     PRODUCT_ICON_PNG "${CMAKE_CURRENT_SOURCE_DIR}/app/ios/FORDLINK/Assets.xcassets/AppIcon.appiconset/AppIcon-60@3x.png")
   target_link_libraries(fordlink-discover PRIVATE FORDLINK::Core)
+  if(MSVC)
+    target_compile_options(fordlink-discover PRIVATE
+      "/FI${CMAKE_CURRENT_SOURCE_DIR}/src/link/platform/windows/link-discover-theme.h")
+  endif()
+  target_compile_definitions(fordlink-discover PRIVATE
+    LINK_THEME_BACKGROUND=0x002C1806
+    LINK_THEME_PANEL=0x0044280B
+    LINK_THEME_INPUT=0x00271707
+    LINK_THEME_TEXT=0x00FBF7F4
+    LINK_THEME_MUTED=0x00C9A882
+    LINK_THEME_ACCENT=0x00D17A21
+    LINK_THEME_ACCENT_TEXT=0x00271707
+    "LINK_PRODUCT_FONT_UI=\"Segoe UI\"")
 endif()
