@@ -442,7 +442,7 @@ private struct ProductDashboardView: View {
     }
 }
 
-private struct ProductEvidenceView: View {private struct ProductEvidenceView: View {
+private struct ProductEvidenceView: View {
     @ObservedObject var model: ConnectionViewModel
 
     var body: some View {
@@ -506,7 +506,7 @@ private struct ProductGraphView: View {
     }
 }
 
-private struct ProductTestsView: View {private struct ProductTestsView: View {
+private struct ProductTestsView: View {
     @ObservedObject var model: ConnectionViewModel
 
     var body: some View {
