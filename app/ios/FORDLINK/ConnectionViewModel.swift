@@ -28,6 +28,22 @@ final class ConnectionViewModel: NSObject, ObservableObject, @preconcurrency For
     @Published private(set) var speedHistory = [Double]()
     @Published private(set) var coolantHistory = [Double]()
     @Published private(set) var throttleHistory = [Double]()
+    @Published private(set) var languageOptions = [LinkSettingOption]()
+    @Published private(set) var selectedLanguageID = "system"
+    @Published private(set) var measurementOptions = [LinkSettingOption]()
+    @Published private(set) var selectedMeasurementID = "system"
+    @Published private(set) var rpmDisplayUnit = "rpm"
+    @Published private(set) var speedDisplayUnit = "km/h"
+    @Published private(set) var coolantDisplayUnit = "degC"
+    @Published private(set) var throttleDisplayUnit = "%"
+    @Published private(set) var rpmGraphMinimum = 0.0
+    @Published private(set) var rpmGraphMaximum = 7000.0
+    @Published private(set) var speedGraphMinimum = 0.0
+    @Published private(set) var speedGraphMaximum = 220.0
+    @Published private(set) var coolantGraphMinimum = -40.0
+    @Published private(set) var coolantGraphMaximum = 130.0
+    @Published private(set) var throttleGraphMinimum = 0.0
+    @Published private(set) var throttleGraphMaximum = 100.0
     @Published private(set) var isActive = false
     @Published private(set) var isReady = false
     @Published private(set) var recordedSampleCount = 0
@@ -45,6 +61,20 @@ final class ConnectionViewModel: NSObject, ObservableObject, @preconcurrency For
 
     func connect() { if !isActive { controller.start() } }
     func disconnect() { controller.disconnect() }
+
+    func localizedText(_ key: String) -> String {
+        controller.localizedText(forKey: key)
+    }
+
+    func selectLanguage(_ id: String) {
+        controller.setSelectedLanguageTag(id)
+        refresh()
+    }
+
+    func selectMeasurementSystem(_ id: String) {
+        controller.setSelectedMeasurementSystemKey(id)
+        refresh()
+    }
 
     func prepareCSVExport() {
         guard let snapshot = controller.csvDataSnapshot() else { return }
@@ -88,8 +118,49 @@ final class ConnectionViewModel: NSObject, ObservableObject, @preconcurrency For
         speedHistory = controller.speedHistory.map { $0.doubleValue }
         coolantHistory = controller.coolantHistory.map { $0.doubleValue }
         throttleHistory = controller.throttleHistory.map { $0.doubleValue }
+
+        languageOptions = zip(
+            controller.availableLanguageTags,
+            controller.availableLanguageNames
+        ).map { LinkSettingOption(id: $0.0, title: $0.1) }
+        selectedLanguageID = controller.selectedLanguageTag
+        measurementOptions = zip(
+            controller.availableMeasurementSystemKeys,
+            controller.availableMeasurementSystemNames
+        ).map { LinkSettingOption(id: $0.0, title: $0.1) }
+        selectedMeasurementID = controller.selectedMeasurementSystemKey
+
+        rpmDisplayUnit = controller.rpmDisplayUnit
+        speedDisplayUnit = controller.speedDisplayUnit
+        coolantDisplayUnit = controller.coolantDisplayUnit
+        throttleDisplayUnit = controller.throttleDisplayUnit
+        applyRange(controller.rpmDisplayRange, fallback: 0...7000) {
+            rpmGraphMinimum = $0; rpmGraphMaximum = $1
+        }
+        applyRange(controller.speedDisplayRange, fallback: 0...220) {
+            speedGraphMinimum = $0; speedGraphMaximum = $1
+        }
+        applyRange(controller.coolantDisplayRange, fallback: -40...130) {
+            coolantGraphMinimum = $0; coolantGraphMaximum = $1
+        }
+        applyRange(controller.throttleDisplayRange, fallback: 0...100) {
+            throttleGraphMinimum = $0; throttleGraphMaximum = $1
+        }
+
         isActive = controller.isActive
         isReady = controller.isReady
         recordedSampleCount = Int(clamping: controller.recordedSampleCount)
+    }
+
+    private func applyRange(
+        _ values: [NSNumber],
+        fallback: ClosedRange<Double>,
+        _ assign: (Double, Double) -> Void
+    ) {
+        guard values.count >= 2 else {
+            assign(fallback.lowerBound, fallback.upperBound)
+            return
+        }
+        assign(values[0].doubleValue, values[1].doubleValue)
     }
 }

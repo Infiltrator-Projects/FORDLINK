@@ -8,6 +8,7 @@
 #include "link/src/core/i18n.c"
 #include "link/src/core/i18n_platform.c"
 #include "link/src/core/language_pack.c"
+#include "link/src/core/units.c"
 #include "link/src/core/fuel_economy.c"
 #include "link/src/core/diagnostic_request.c"
 #include "link/src/core/doip.c"
@@ -17,7 +18,7 @@
 #include "link/src/core/parameter.c"
 #include "link/src/core/scheduler.c"
 #ifndef LINK_SOURCE_REVISION
-#define LINK_SOURCE_REVISION "4e50d442edecda99403a2e50019f0e59a70beb26"
+#define LINK_SOURCE_REVISION "b1d8ccc5a72c71e51ba49ef0bfe71754149f4675"
 #define FORDLINK_DEFINED_LINK_SOURCE_REVISION 1
 #endif
 #include "link/src/core/telemetry.c"

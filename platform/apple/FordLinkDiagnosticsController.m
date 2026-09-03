@@ -152,20 +152,37 @@
 
 - (NSArray<NSNumber *> *)rpmHistory
 {
-    return [self.shared recentValuesForPID:0x0C limit:60U];
+    return [self.shared displayRecentValuesForPID:0x0C limit:60U];
 }
 - (NSArray<NSNumber *> *)speedHistory
 {
-    return [self.shared recentValuesForPID:0x0D limit:60U];
+    return [self.shared displayRecentValuesForPID:0x0D limit:60U];
 }
 - (NSArray<NSNumber *> *)coolantHistory
 {
-    return [self.shared recentValuesForPID:0x05 limit:60U];
+    return [self.shared displayRecentValuesForPID:0x05 limit:60U];
 }
 - (NSArray<NSNumber *> *)throttleHistory
 {
-    return [self.shared recentValuesForPID:0x11 limit:60U];
+    return [self.shared displayRecentValuesForPID:0x11 limit:60U];
 }
+- (NSArray<NSString *> *)availableLanguageTags { return self.shared.availableLanguageTags; }
+- (NSArray<NSString *> *)availableLanguageNames { return self.shared.availableLanguageNames; }
+- (NSString *)selectedLanguageTag { return self.shared.selectedLanguageTag; }
+- (NSArray<NSString *> *)availableMeasurementSystemKeys { return self.shared.availableMeasurementSystemKeys; }
+- (NSArray<NSString *> *)availableMeasurementSystemNames { return self.shared.availableMeasurementSystemNames; }
+- (NSString *)selectedMeasurementSystemKey { return self.shared.selectedMeasurementSystemKey; }
+- (NSString *)rpmDisplayUnit { return [self.shared displayUnitForPID:0x0C]; }
+- (NSString *)speedDisplayUnit { return [self.shared displayUnitForPID:0x0D]; }
+- (NSString *)coolantDisplayUnit { return [self.shared displayUnitForPID:0x05]; }
+- (NSString *)throttleDisplayUnit { return [self.shared displayUnitForPID:0x11]; }
+- (NSArray<NSNumber *> *)rpmDisplayRange { return [self.shared displayRangeForPID:0x0C]; }
+- (NSArray<NSNumber *> *)speedDisplayRange { return [self.shared displayRangeForPID:0x0D]; }
+- (NSArray<NSNumber *> *)coolantDisplayRange { return [self.shared displayRangeForPID:0x05]; }
+- (NSArray<NSNumber *> *)throttleDisplayRange { return [self.shared displayRangeForPID:0x11]; }
+- (NSString *)localizedTextForKey:(NSString *)key { return [self.shared localizedTextForKey:key]; }
+- (void)setSelectedLanguageTag:(NSString *)tag { [self.shared setSelectedLanguageTag:tag]; }
+- (void)setSelectedMeasurementSystemKey:(NSString *)key { [self.shared setSelectedMeasurementSystemKey:key]; }
 
 - (void)start
 {

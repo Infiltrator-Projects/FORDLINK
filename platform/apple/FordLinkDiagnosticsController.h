@@ -34,11 +34,28 @@ NS_ASSUME_NONNULL_BEGIN
 @property(nonatomic, copy, readonly) NSArray<NSNumber *> *speedHistory;
 @property(nonatomic, copy, readonly) NSArray<NSNumber *> *coolantHistory;
 @property(nonatomic, copy, readonly) NSArray<NSNumber *> *throttleHistory;
+@property(nonatomic, copy, readonly) NSArray<NSString *> *availableLanguageTags;
+@property(nonatomic, copy, readonly) NSArray<NSString *> *availableLanguageNames;
+@property(nonatomic, copy, readonly) NSString *selectedLanguageTag;
+@property(nonatomic, copy, readonly) NSArray<NSString *> *availableMeasurementSystemKeys;
+@property(nonatomic, copy, readonly) NSArray<NSString *> *availableMeasurementSystemNames;
+@property(nonatomic, copy, readonly) NSString *selectedMeasurementSystemKey;
+@property(nonatomic, copy, readonly) NSString *rpmDisplayUnit;
+@property(nonatomic, copy, readonly) NSString *speedDisplayUnit;
+@property(nonatomic, copy, readonly) NSString *coolantDisplayUnit;
+@property(nonatomic, copy, readonly) NSString *throttleDisplayUnit;
+@property(nonatomic, copy, readonly) NSArray<NSNumber *> *rpmDisplayRange;
+@property(nonatomic, copy, readonly) NSArray<NSNumber *> *speedDisplayRange;
+@property(nonatomic, copy, readonly) NSArray<NSNumber *> *coolantDisplayRange;
+@property(nonatomic, copy, readonly) NSArray<NSNumber *> *throttleDisplayRange;
 @property(nonatomic, readonly, getter=isActive) BOOL active;
 @property(nonatomic, readonly, getter=isReady) BOOL ready;
 @property(nonatomic, readonly) NSUInteger recordedSampleCount;
 - (void)start;
 - (void)disconnect;
+- (NSString *)localizedTextForKey:(NSString *)key;
+- (void)setSelectedLanguageTag:(NSString *)tag;
+- (void)setSelectedMeasurementSystemKey:(NSString *)key;
 - (nullable NSData *)csvDataSnapshot;
 @end
 NS_ASSUME_NONNULL_END

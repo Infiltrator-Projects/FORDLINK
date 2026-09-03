@@ -73,6 +73,7 @@ struct ContentView: View {
             primary: { primaryGrid },
             tools: { supportingTools })
             .linkDiagnosticTheme(productTheme)
+            .linkDiagnosticLocalization { model.localizedText($0) }
     }
 
     private var header: some View {
@@ -150,8 +151,8 @@ struct ContentView: View {
                     }
                 } else if !model.isActive {
                     HStack(spacing: 10) {
-                        productMetric("(model.fordModuleCatalogueRows.count)", "Ford modules", "cpu")
-                        productMetric("(model.fordProcedureCapabilityRows.count)", "Service/test families", "wrench.and.screwdriver")
+                        productMetric("\(model.fordModuleCatalogueRows.count)", "Ford modules", "cpu")
+                        productMetric("\(model.fordProcedureCapabilityRows.count)", "Service/test families", "wrench.and.screwdriver")
                     }
                     Text("FORDLINK is ready to scan Ford networks and merge live vehicle evidence with the built-in catalogue.")
                         .font(.caption)
@@ -190,18 +191,12 @@ struct ContentView: View {
             LinkTaskTile(.graph) { ProductGraphView(model: model) }
             LinkTaskTile(.tests) { ProductTestsView(model: model) }
             LinkTaskTile(.services) { ProductServicesView(model: model) }
+            LinkTaskTile(.settings) { ProductSettingsView(model: model) }
         }
     }
 
     private var supportingTools: some View {
-        LinkPanel {
-            VStack(alignment: .leading, spacing: 7) {
-                LinkSectionHeader(title: "Settings", kicker: "Application")
-                LinkCompactLink("Settings", "Adapter and application information", "gearshape.fill") {
-                    ProductSettingsView(model: model)
-                }
-            }
-        }
+        EmptyView()
     }
 
 
@@ -491,13 +486,21 @@ private struct ProductGraphView: View {
                          : "Connect to populate the traces; graph channels are already configured.")
                         .font(.caption)
                         .foregroundStyle(ProductTheme.secondary)
-                    productTrace("Engine RPM", "rpm", model.rpmHistory, 0...7000)
+                    productTrace(
+                        "Engine RPM", model.rpmDisplayUnit, model.rpmHistory,
+                        model.rpmGraphMinimum...model.rpmGraphMaximum)
                     productDivider
-                    productTrace("Vehicle speed", "km/h", model.speedHistory, 0...220)
+                    productTrace(
+                        "Vehicle speed", model.speedDisplayUnit, model.speedHistory,
+                        model.speedGraphMinimum...model.speedGraphMaximum)
                     productDivider
-                    productTrace("Coolant temperature", "°C", model.coolantHistory, -40...130)
+                    productTrace(
+                        "Coolant temperature", model.coolantDisplayUnit, model.coolantHistory,
+                        model.coolantGraphMinimum...model.coolantGraphMaximum)
                     productDivider
-                    productTrace("Throttle position", "%", model.throttleHistory, 0...100)
+                    productTrace(
+                        "Throttle position", model.throttleDisplayUnit, model.throttleHistory,
+                        model.throttleGraphMinimum...model.throttleGraphMaximum)
                 }
             }
             .padding(16)
@@ -596,23 +599,19 @@ private struct ProductSettingsView: View {
     @ObservedObject var model: ConnectionViewModel
 
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 15) {
-                LinkLabeledPanel(title: "FORDLINK", systemImage: "gearshape.fill") {
-                    productValueRow("Version", model.versionText, icon: "number.circle")
-                    productDivider
-                    productValueRow("Adapter", model.peripheralName, icon: "antenna.radiowaves.left.and.right")
-                    productDivider
-                    productValueRow("Standards core", "LINK · read-only diagnostic flow", icon: "shield.lefthalf.filled")
-                    Text("Common OBD presentation and geometry come from LINK. Ford-specific diagnostic knowledge remains a separate evidence-backed layer.")
-                        .font(.caption)
-                        .foregroundStyle(ProductTheme.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-            }
-            .padding(16)
-        }
-        .productDiagnosticScreen("Settings")
+        LinkDiagnosticSettingsView(
+            languageOptions: model.languageOptions,
+            selectedLanguageID: Binding(
+                get: { model.selectedLanguageID },
+                set: { model.selectLanguage($0) }),
+            measurementOptions: model.measurementOptions,
+            selectedMeasurementID: Binding(
+                get: { model.selectedMeasurementID },
+                set: { model.selectMeasurementSystem($0) }),
+            productName: "FORDLINK",
+            productVersion: model.versionText,
+            adapterName: model.peripheralName,
+            coreSummary: "Shared diagnostics, language and measurement preferences")
     }
 }
 
