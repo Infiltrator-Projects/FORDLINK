@@ -45,11 +45,13 @@ private let productTheme = LinkDiagnosticTheme(
         title2: .title2.bold()))
 
 private struct ProductBadge: View {
+    var size: CGFloat = 56
+
     var body: some View {
         Image("FORDLINKEmblem")
             .resizable()
             .scaledToFit()
-            .frame(width: 56, height: 56)
+            .frame(width: size, height: size)
             .shadow(color: .black.opacity(0.28), radius: 7, x: 0, y: 4)
             .accessibilityHidden(true)
     }
@@ -63,6 +65,7 @@ private extension View {
 
 struct ContentView: View {
     @StateObject private var model = ConnectionViewModel()
+    @State private var showingAbout = false
 
     var body: some View {
         LinkCommandCentreShell(
@@ -79,6 +82,38 @@ struct ContentView: View {
                 \.layoutDirection,
                 model.interfaceLocaleIdentifier.hasPrefix("ar")
                     ? .rightToLeft : .leftToRight)
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                LinkDiagnosticAboutButton(
+                    productName: "FORDLINK",
+                    copyright: "© 2026 Shannon Smith") {
+                        showingAbout = true
+                    }
+                    .linkDiagnosticTheme(productTheme)
+            }
+            .sheet(isPresented: $showingAbout) {
+                LinkDiagnosticAboutView(
+                    info: aboutInfo,
+                    onClose: { showingAbout = false }) {
+                        ProductBadge(size: 82)
+                    }
+                    .linkDiagnosticTheme(productTheme)
+                    .preferredColorScheme(.dark)
+                    .tint(ProductTheme.accent)
+            }
+    }
+
+    private var aboutInfo: LinkDiagnosticAboutInfo {
+        LinkDiagnosticAboutInfo(
+            productName: "FORDLINK",
+            subtitle: "FORD · LINK DIAGNOSTICS",
+            version: model.versionText,
+            summary: "A C-first, open-source Ford vehicle diagnostics platform authored by Shannon Smith.",
+            authors: ["Shannon Smith"],
+            copyright: "Copyright © 2026 Shannon Smith",
+            website: URL(string: "https://github.com/Infiltrator-Projects/FORDLINK"),
+            licenseName: "GPL-3.0-or-later",
+            licenseText: "FORDLINK is free software licensed under the GNU General Public License version 3 or, at your option, any later version (GPL-3.0-or-later).\n\nSee LICENSE in the source package for the complete licence text.",
+            credits: ["Shannon Smith — Author and project maintainer"])
     }
 
     private var header: some View {

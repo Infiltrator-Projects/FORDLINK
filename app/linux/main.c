@@ -490,6 +490,22 @@ int main(int argc, char **argv)
 {
     ProductContext context = {0};
     LinkGtkShellDescriptor descriptor = {0};
+    LinkAboutInfo about_info = {
+        .product_name = "FORDLINK",
+        .subtitle = "FORD · LINK DIAGNOSTICS",
+        .version = fordlink_version(),
+        .description = "A C-first, open-source Ford vehicle diagnostics platform authored by Shannon Smith.",
+        .authors = "Shannon Smith",
+        .copyright = "Copyright © 2026 Shannon Smith",
+        .website = "https://github.com/Infiltrator-Projects/FORDLINK",
+        .license_name = "GPL-3.0-or-later",
+        .license_text =
+            "FORDLINK is free software licensed under the GNU General Public "
+            "License version 3 or, at your option, any later version "
+            "(GPL-3.0-or-later).\n\n"
+            "See LICENSE in the source package for the complete licence text.",
+        .credits = "Shannon Smith — Author and project maintainer"
+    };
     descriptor.app_id = "com.github.InfiltratorProjects.FORDLINK";
     descriptor.window_title = "FORDLINK · Ford Diagnostics";
     descriptor.brand_name = "FORDLINK";
@@ -498,6 +514,7 @@ int main(int argc, char **argv)
     descriptor.emblem_resource = "/com/github/Infiltrator-Projects/FORDLINK/fordlink-emblem.png";
     descriptor.css = css;
     descriptor.render_section = render;
+    descriptor.about = &about_info;
     descriptor.connection_changed = connection_changed;
     descriptor.diagnostic_changed = diagnostic_changed;
     descriptor.manufacturer_extension = &ford_manufacturer_extension;

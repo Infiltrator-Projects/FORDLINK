@@ -114,6 +114,9 @@ if(FORDLINK_BUILD_WINDOWS_DISCOVER)
     PRODUCT_NAME "FORDLINK" PRODUCT_SLUG "fordlink" WINDOW_CLASS "FORDLINKDiscoverWindow"
     PRODUCT_VERSION "${PROJECT_VERSION}" PRODUCT_COPYRIGHT "Copyright (C) 2026 Shannon Smith"
     PRODUCT_SUBTITLE "Ford Diagnostics"
+    PRODUCT_DESCRIPTION "A C-first, open-source Ford vehicle diagnostics platform."
+    PRODUCT_AUTHORS "Shannon Smith"
+    PRODUCT_LICENSE_NAME "GPL-3.0-or-later"
     PRODUCT_WEBSITE "https://github.com/Infiltrator-Projects/FORDLINK"
     PRODUCT_ICON_PNG "${CMAKE_CURRENT_SOURCE_DIR}/app/ios/FORDLINK/Assets.xcassets/AppIcon.appiconset/AppIcon-60@3x.png")
   target_link_libraries(fordlink-discover PRIVATE FORDLINK::Core)

@@ -104,6 +104,10 @@ jobs:
           grep -Fq 'LinkTaskTile(.graph)' app/ios/FORDLINK/ContentView.swift
           grep -Fq 'LinkTaskTile(.tests)' app/ios/FORDLINK/ContentView.swift
           grep -Fq 'LinkTaskTile(.services)' app/ios/FORDLINK/ContentView.swift
+          grep -Fq 'LinkDiagnosticAboutButton' app/ios/FORDLINK/ContentView.swift
+          grep -Fq 'LinkDiagnosticAboutView' app/ios/FORDLINK/ContentView.swift
+          grep -Fq 'descriptor.about = &about_info;' app/linux/main.c
+          grep -Fq 'link_gtk_show_about' src/link/platform/linux/link-gtk-about.c
           ! grep -Fq 'LinkHomeTile("OBD"' app/ios/FORDLINK/ContentView.swift
           grep -Fq 'return self.shared.standardLiveValueRows;' platform/apple/FordLinkDiagnosticsController.m
           if grep -Eq '\.link-(connection-bar|device-row|adapter-combo|toolbar-button|link-button|save-session-button|card|status-chip)[^{]*\{[^}]*((min|max)-(width|height)|padding|border-radius)' app/linux/main.c; then
