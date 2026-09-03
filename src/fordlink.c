@@ -18,7 +18,7 @@
 #include "link/src/core/parameter.c"
 #include "link/src/core/scheduler.c"
 #ifndef LINK_SOURCE_REVISION
-#define LINK_SOURCE_REVISION "00b60a449aafe9398124e7dafa7d48b0ae37ac13"
+#define LINK_SOURCE_REVISION "e3fe083bec217f24799c5855036db0f7be28326b"
 #define FORDLINK_DEFINED_LINK_SOURCE_REVISION 1
 #endif
 #include "link/src/core/telemetry.c"
