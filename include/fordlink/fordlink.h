@@ -2,7 +2,7 @@
 #ifndef FORDLINK_H
 #define FORDLINK_H
 #ifndef FORDLINK_VERSION
-#define FORDLINK_VERSION "0.2.15"
+#define FORDLINK_VERSION "0.2.16"
 #endif
 #define FORDLINK_BRAND "Ford"
 const char *fordlink_product_name(void);
