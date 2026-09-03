@@ -256,6 +256,17 @@ private struct ProductModulesView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 15) {
+                LinkLabeledPanel(title: "Ford networks", systemImage: "point.3.filled.connected.trianglepath.dotted") {
+                    productValueRow("HS-CAN", "Standard OBD lane · direct DLC network", icon: "network")
+                    productDivider
+                    productValueRow("MS-CAN", "Enhanced Ford lane · supported adapter required", icon: "arrow.triangle.branch")
+                    productDivider
+                    productValueRow("Additional CAN lanes", "Vehicle/profile specific · never guessed", icon: "square.stack.3d.up")
+                    Text("FORDLINK now models Ford networks separately from modules. This lets discovery grow into HS-CAN, MS-CAN and later gateway-exposed lanes without folding everything into generic OBD.")
+                        .font(.caption)
+                        .foregroundStyle(ProductTheme.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
                 LinkLabeledPanel(title: "Standard responders", systemImage: "square.stack.3d.up.fill") {
                     productValueRow("Physical responders", model.standardResponderSummary, icon: "point.3.connected.trianglepath.dotted")
                     productDivider

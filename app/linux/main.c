@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 #include "fordlink/fordlink.h"
+#include "fordlink/network.h"
 #include "link-gtk-shell.h"
 #include "link-gtk-widgets.h"
 #include "link/workspace.h"
@@ -127,18 +128,28 @@ static void append_modules(GtkWidget *body, ProductContext *context)
             const LinkObd2ResponderPidSet *responder =
                 &context->diagnostic.supported_pid_responders.entries[index];
             char key[48];
-            char value[128];
+            char value[160];
+            FordlinkNetworkKind network_kind =
+                fordlink_network_for_standard_obd_responder(
+                    responder->responder_id, responder->extended_id);
+            const FordlinkNetworkDescriptor *network =
+                fordlink_network_descriptor(network_kind);
             (void)snprintf(key, sizeof(key), "ECU %zu", index + 1U);
             (void)snprintf(value, sizeof(value),
-                "%s CAN 0x%X · %zu advertised PIDs",
+                "%s · %s CAN 0x%X · %zu advertised PIDs",
+                network != NULL ? network->display_name : "Unclassified network",
                 responder->extended_id ? "29-bit" : "11-bit",
                 (unsigned int)responder->responder_id,
                 pid_count(&responder->supported_pids));
             link_gtk_card_append_detail(card, key, value);
         }
     }
+    link_gtk_card_append_detail(card, "HS-CAN",
+        "Standard OBD lane · direct DLC network");
+    link_gtk_card_append_detail(card, "MS-CAN",
+        "Enhanced Ford lane · explicit adapter/network support required");
     link_gtk_card_append_note(card,
-        "Ford-specific module discovery is added only when its protocol and identity evidence are verified.");
+        "Additional Ford CAN lanes are profile-specific. FORDLINK records them explicitly rather than guessing module placement or copying proprietary databases.");
     gtk_box_append(GTK_BOX(body), card);
 }
 

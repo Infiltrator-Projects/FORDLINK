@@ -41,3 +41,16 @@ Generic diagnostic baseline: **available through LINK** — adapter capability m
 
 Ford-specific/proprietary vehicle coverage: not claimed yet; it will be added
 here only from evidence-backed Ford data.
+
+## Ford network model
+
+FORDLINK now has an explicit Ford network taxonomy rather than treating every
+module as one generic CAN responder. HS-CAN is modelled as the standard OBD
+lane, MS-CAN as a separate enhanced-diagnostics lane requiring explicit adapter
+support, and additional Ford CAN lanes are represented as profile-specific
+networks whose physical details must come from verified vehicle evidence.
+
+This structure was informed by observing how mature Ford diagnostic tools keep
+vehicle networks, module identity, live data, tests and service procedures
+separate. No proprietary FORScan code, module database, PID table or service
+definition is included. See `docs/FORD_NETWORKS.md`.

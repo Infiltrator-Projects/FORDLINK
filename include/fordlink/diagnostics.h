@@ -3,6 +3,7 @@
 #define FORDLINK_DIAGNOSTICS_H
 
 #include "fordlink/obd2.h"
+#include "fordlink/network.h"
 #include "link/diagnostic_flow.h"
 #include "link/diagnostic_request.h"
 #include "link/discover.h"
