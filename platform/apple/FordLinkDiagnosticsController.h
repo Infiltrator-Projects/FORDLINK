@@ -26,6 +26,9 @@ NS_ASSUME_NONNULL_BEGIN
 @property(nonatomic, copy, readonly) NSString *standardResponderSummary;
 @property(nonatomic, copy, readonly) NSString *supportedPIDSummary;
 @property(nonatomic, copy, readonly) NSArray<NSString *> *standardLiveValueRows;
+@property(nonatomic, copy, readonly) NSString *fordModuleSummary;
+@property(nonatomic, copy, readonly) NSArray<NSString *> *fordModuleRows;
+@property(nonatomic, copy, readonly) NSArray<NSString *> *fordProcedureCapabilityRows;
 @property(nonatomic, readonly, getter=isActive) BOOL active;
 @property(nonatomic, readonly, getter=isReady) BOOL ready;
 @property(nonatomic, readonly) NSUInteger recordedSampleCount;

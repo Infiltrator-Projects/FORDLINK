@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 #include "fordlink/fordlink.h"
 #include "fordlink/network.h"
+#include "fordlink/module_scan.h"
 #include "link-gtk-shell.h"
 #include "link-gtk-widgets.h"
 #include "link/workspace.h"
@@ -20,6 +21,10 @@ typedef struct {
     bool sample_valid[256];
     LinkObd2Sample samples[256];
     size_t live_sample_count;
+    FordlinkModuleScanner ford_scan;
+    bool ford_scan_started;
+    bool ford_scan_complete;
+    bool ford_scan_success;
 } ProductContext;
 
 static const char css[] =
@@ -151,6 +156,53 @@ static void append_modules(GtkWidget *body, ProductContext *context)
     link_gtk_card_append_note(card,
         "Additional Ford CAN lanes are profile-specific. FORDLINK records them explicitly rather than guessing module placement or copying proprietary databases.");
     gtk_box_append(GTK_BOX(body), card);
+
+    {
+        GtkWidget *ford = link_gtk_card_new(
+            "FORD MODULE SCAN",
+            "Read-only UDS identity and module DTC census");
+        size_t index;
+        size_t shown = 0U;
+        char status[96];
+        if (!context->ford_scan_started) {
+            link_gtk_card_append_status(ford, "Pending manufacturer scan", "state-warning");
+        } else {
+            (void)snprintf(status, sizeof(status), "%zu detected · %zu endpoints scanned",
+                fordlink_module_scanner_responsive_count(&context->ford_scan),
+                fordlink_module_scanner_result_count(&context->ford_scan));
+            link_gtk_card_append_status(
+                ford, status,
+                context->ford_scan_complete ? "state-success" : "state-warning");
+            for (index = 0U;
+                 index < fordlink_module_scanner_result_count(&context->ford_scan);
+                 ++index) {
+                const FordlinkModuleScanResult *result =
+                    fordlink_module_scanner_result_at(&context->ford_scan, index);
+                char key[48];
+                char value[256];
+                if (result == NULL || !result->responded) continue;
+                (void)snprintf(key, sizeof(key), "%s",
+                    result->endpoint != NULL ? result->endpoint->module_key : "ECU");
+                if (fordlink_module_scan_format_result(
+                        result, value, sizeof(value)) < 0)
+                    (void)snprintf(value, sizeof(value), "Responded");
+                if (result->part_number[0] != '\0') {
+                    size_t used = strlen(value);
+                    if (used + 10U < sizeof(value))
+                        (void)snprintf(value + used, sizeof(value) - used,
+                            " · Part %s", result->part_number);
+                }
+                link_gtk_card_append_detail(ford, key, value);
+                ++shown;
+            }
+            if (shown == 0U && context->ford_scan_complete)
+                link_gtk_card_append_note(ford,
+                    "No corroborated HS-CAN module endpoint answered this read-only pass.");
+        }
+        link_gtk_card_append_note(ford,
+            "The scan uses only UDS 0x22 identity reads and 0x19 DTC inventory. State-changing services remain blocked.");
+        gtk_box_append(GTK_BOX(body), ford);
+    }
 }
 
 static void append_faults(GtkWidget *body, ProductContext *context)
@@ -344,6 +396,57 @@ static void render(size_t section, GtkWidget *body, void *opaque)
     }
 }
 
+static bool ford_scan_begin(void *opaque)
+{
+    ProductContext *context = opaque;
+    context->ford_scan_started = true;
+    context->ford_scan_complete = false;
+    context->ford_scan_success = false;
+    return fordlink_module_scanner_begin(&context->ford_scan);
+}
+
+static bool ford_scan_next_command(char *buffer, size_t buffer_size,
+                                   size_t *written, uint64_t *timeout_ms,
+                                   void *opaque)
+{
+    ProductContext *context = opaque;
+    return fordlink_module_scanner_next_command(
+        &context->ford_scan, buffer, buffer_size, written, timeout_ms);
+}
+
+static bool ford_scan_accept_response(const LinkElm327Response *response,
+                                      bool *complete, void *opaque)
+{
+    ProductContext *context = opaque;
+    bool done = false;
+    if (!fordlink_module_scanner_accept(&context->ford_scan, response, &done))
+        return false;
+    if (done) context->ford_scan_complete = true;
+    *complete = done;
+    return true;
+}
+
+static bool ford_scan_progress_changed(void *opaque)
+{
+    ProductContext *context = opaque;
+    return fordlink_module_scanner_take_progress_changed(&context->ford_scan);
+}
+
+static void ford_scan_finished(bool complete, void *opaque)
+{
+    ProductContext *context = opaque;
+    context->ford_scan_complete = true;
+    context->ford_scan_success = complete;
+}
+
+static const LinkGtkManufacturerExtension ford_manufacturer_extension = {
+    .begin = ford_scan_begin,
+    .next_command = ford_scan_next_command,
+    .accept_response = ford_scan_accept_response,
+    .progress_changed = ford_scan_progress_changed,
+    .finished = ford_scan_finished
+};
+
 static void connection_changed(LinkTransport *transport, bool connected,
                                const char *identity, void *opaque)
 {
@@ -357,6 +460,10 @@ static void connection_changed(LinkTransport *transport, bool connected,
         context->diagnostic_ready = false;
         context->live_sample_count = 0U;
         memset(context->sample_valid, 0, sizeof(context->sample_valid));
+        memset(&context->ford_scan, 0, sizeof(context->ford_scan));
+        context->ford_scan_started = false;
+        context->ford_scan_complete = false;
+        context->ford_scan_success = false;
     }
 }
 
@@ -393,6 +500,7 @@ int main(int argc, char **argv)
     descriptor.render_section = render;
     descriptor.connection_changed = connection_changed;
     descriptor.diagnostic_changed = diagnostic_changed;
+    descriptor.manufacturer_extension = &ford_manufacturer_extension;
     descriptor.use_client_side_titlebar = true;
     descriptor.context = &context;
     return link_gtk_shell_run(argc, argv, &descriptor);

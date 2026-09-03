@@ -20,6 +20,9 @@ final class ConnectionViewModel: NSObject, ObservableObject, @preconcurrency For
     @Published private(set) var standardResponderSummary = "0 physical responders"
     @Published private(set) var supportedPIDSummary = "0 advertised PIDs"
     @Published private(set) var standardLiveRows = [String]()
+    @Published private(set) var fordModuleSummary = "Connect to scan Ford modules"
+    @Published private(set) var fordModuleRows = [String]()
+    @Published private(set) var fordProcedureCapabilityRows = [String]()
     @Published private(set) var isActive = false
     @Published private(set) var isReady = false
     @Published private(set) var recordedSampleCount = 0
@@ -72,6 +75,9 @@ final class ConnectionViewModel: NSObject, ObservableObject, @preconcurrency For
         standardResponderSummary = controller.standardResponderSummary
         supportedPIDSummary = controller.supportedPIDSummary
         standardLiveRows = controller.standardLiveValueRows
+        fordModuleSummary = controller.fordModuleSummary
+        fordModuleRows = controller.fordModuleRows
+        fordProcedureCapabilityRows = controller.fordProcedureCapabilityRows
         isActive = controller.isActive
         isReady = controller.isReady
         recordedSampleCount = Int(clamping: controller.recordedSampleCount)

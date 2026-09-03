@@ -267,6 +267,27 @@ private struct ProductModulesView: View {
                         .foregroundStyle(ProductTheme.secondary)
                         .fixedSize(horizontal: false, vertical: true)
                 }
+                LinkLabeledPanel(title: "Ford module scan", systemImage: "rectangle.3.group.bubble.left.fill") {
+                    productValueRow("Status", model.fordModuleSummary, icon: "magnifyingglass")
+                    if model.fordModuleRows.isEmpty {
+                        Text(model.isActive
+                             ? "The read-only Ford module census runs automatically after the standard fault pass."
+                             : "Connect to identify corroborated Ford HS-CAN module endpoints.")
+                            .font(.caption)
+                            .foregroundStyle(ProductTheme.secondary)
+                    } else {
+                        ForEach(model.fordModuleRows, id: \.self) { row in
+                            productDivider
+                            Text(row)
+                                .font(.caption.monospaced())
+                                .foregroundStyle(ProductTheme.primary)
+                                .fixedSize(horizontal: false, vertical: true)
+                        }
+                    }
+                    Text("Only UDS identity reads and module DTC inventory are transmitted by this scan.")
+                        .font(.caption2)
+                        .foregroundStyle(ProductTheme.secondary)
+                }
                 LinkLabeledPanel(title: "Standard responders", systemImage: "square.stack.3d.up.fill") {
                     productValueRow("Physical responders", model.standardResponderSummary, icon: "point.3.connected.trianglepath.dotted")
                     productDivider
@@ -498,7 +519,7 @@ private struct ProductTestsView: View {
                     }
                 }
                 LinkLabeledPanel(title: "Additional tests", systemImage: "checkmark.seal") {
-                    Text("Verified standard monitor results and manufacturer self-tests belong here as support is added.")
+                    Text("FORDLINK now has explicit capability metadata for module self-tests and component/actuator tests. Actual commands remain disabled until the active module/profile is independently verified.")
                         .font(.caption)
                         .foregroundStyle(ProductTheme.secondary)
                 }
@@ -521,7 +542,16 @@ private struct ProductServicesView: View {
                          : "Connect to evaluate supported service procedures.")
                         .font(.headline)
                         .foregroundStyle(ProductTheme.primary)
-                    Text("Only explicitly supported procedures are presented here. Unverified operations remain unavailable.")
+                    Text("Capability catalogue")
+                        .font(.caption.bold())
+                        .foregroundStyle(ProductTheme.secondary)
+                    ForEach(model.fordProcedureCapabilityRows, id: \.self) { row in
+                        Text(row)
+                            .font(.caption)
+                            .foregroundStyle(ProductTheme.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    Text("These are recognised Ford procedure families, not enabled commands. A procedure becomes executable only after its module, session, security and preconditions are verified.")
                         .font(.caption)
                         .foregroundStyle(ProductTheme.secondary)
                 }
