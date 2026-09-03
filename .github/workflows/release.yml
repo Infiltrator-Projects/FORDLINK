@@ -106,6 +106,8 @@ jobs:
           test -s "release/FORDLINK-$VERSION-linux-amd64.deb"
           test -s "release/FORDLINK-$VERSION-windows-discover.exe"
           test -s "release/FORDLINK-$VERSION-unsigned.ipa"
+          test "$(dpkg-deb -f "release/FORDLINK-$VERSION-linux-amd64.deb" Package)" = fordlink
+          test "$(dpkg-deb -f "release/FORDLINK-$VERSION-linux-amd64.deb" Version)" = "$VERSION"
           (cd release && sha256sum FORDLINK-* > SHA256SUMS.txt)
           tag="v$VERSION"
           if gh release view "$tag" >/dev/null 2>&1; then
@@ -115,3 +117,36 @@ jobs:
           gh release create "$tag" --target "$GITHUB_SHA" --title "FORDLINK $VERSION" \
             --notes "FORDLINK $VERSION replaces the CLI skeleton with real GUI applications on Linux, Windows and iPhone, all using the shared LINK standards diagnostic core." \
             release/*
+
+      - name: Refresh and verify Infiltrator APT repository
+        env:
+          DISPATCH_TOKEN: ${{ secrets.APT_REPOSITORY_DISPATCH_TOKEN }}
+          RELEASE_SHA: ${{ github.sha }}
+          VERSION: ${{ steps.version.outputs.version }}
+          APP_ID: fordlink
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -n "${DISPATCH_TOKEN:-}" ]]; then
+            if ! GH_TOKEN="$DISPATCH_TOKEN" gh api --method POST \
+              repos/Infiltrator-Projects/Infiltrator-Repository/dispatches \
+              -f event_type='application-release' \
+              -f "client_payload[repository]=$GITHUB_REPOSITORY" \
+              -f "client_payload[sha]=$RELEASE_SHA" >/dev/null; then
+              echo "::warning::Immediate APT dispatch failed; waiting for the five-minute safety refresh."
+            fi
+          else
+            echo "::warning::Immediate APT dispatch token is unavailable; waiting for the five-minute safety refresh."
+          fi
+          catalogue='https://infiltrator-projects.github.io/Infiltrator-Repository/catalogue/apps.json'
+          for attempt in $(seq 1 72); do
+            if curl -fsS --retry 2 --retry-delay 1 "$catalogue?release=$RELEASE_SHA&attempt=$attempt" \
+              | python3 -c 'import json,sys; app=sys.argv[1]; version=sys.argv[2]; data=json.load(sys.stdin); raise SystemExit(0 if any(item.get("id") == app and str(item.get("version")) == version for item in data) else 1)' "$APP_ID" "$VERSION"; then
+              echo "APT repository advertises $APP_ID $VERSION."
+              exit 0
+            fi
+            echo "Waiting for APT publication of $APP_ID $VERSION ($attempt/72)..."
+            sleep 10
+          done
+          echo "::error::GitHub release was published, but APT did not advertise $APP_ID $VERSION within 12 minutes."
+          exit 1

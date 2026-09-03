@@ -1,6 +1,19 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 cmake_minimum_required(VERSION 3.20)
-project(FORDLINK VERSION 0.2.9 LANGUAGES C)
+file(READ "${CMAKE_CURRENT_SOURCE_DIR}/VERSION" FORDLINK_PROJECT_VERSION)
+string(STRIP "${FORDLINK_PROJECT_VERSION}" FORDLINK_PROJECT_VERSION)
+if(NOT FORDLINK_PROJECT_VERSION MATCHES "^[0-9]+\\.[0-9]+\\.[0-9]+$")
+  message(FATAL_ERROR "VERSION must contain a semantic major.minor.patch version")
+endif()
+project(FORDLINK VERSION "${FORDLINK_PROJECT_VERSION}" LANGUAGES C)
+
+file(READ "${CMAKE_CURRENT_SOURCE_DIR}/include/fordlink/fordlink.h" FORDLINK_PUBLIC_VERSION_HEADER)
+string(REGEX MATCH
+  "#define[ \t]+FORDLINK_VERSION[ \t]+\"([0-9]+\\.[0-9]+\\.[0-9]+)\""
+  FORDLINK_PUBLIC_VERSION_MATCH "${FORDLINK_PUBLIC_VERSION_HEADER}")
+if(NOT FORDLINK_PUBLIC_VERSION_MATCH OR NOT CMAKE_MATCH_1 STREQUAL PROJECT_VERSION)
+  message(FATAL_ERROR "VERSION and FORDLINK_VERSION must agree")
+endif()
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_EXTENSIONS OFF)
@@ -12,10 +25,11 @@ enable_testing()
 add_library(fordlink-core STATIC src/fordlink.c)
 add_library(FORDLINK::Core ALIAS fordlink-core)
 target_include_directories(fordlink-core PUBLIC include)
-target_compile_definitions(fordlink-core PRIVATE FORDLINK_VERSION="0.2.9")
+target_compile_definitions(fordlink-core PRIVATE FORDLINK_VERSION="${PROJECT_VERSION}")
 target_link_libraries(fordlink-core PUBLIC LINK::Core)
 
 add_executable(fordlink-smoke tests/test_smoke.c)
+target_compile_definitions(fordlink-smoke PRIVATE FORDLINK_EXPECTED_VERSION="${PROJECT_VERSION}")
 target_link_libraries(fordlink-smoke PRIVATE FORDLINK::Core)
 add_test(NAME fordlink-smoke COMMAND fordlink-smoke)
 add_executable(fordlink-obd2 tests/test_obd2.c)
