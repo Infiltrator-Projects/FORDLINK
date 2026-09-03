@@ -6,6 +6,7 @@
 #include "link-gtk-widgets.h"
 #include "link/workspace.h"
 #include "link/obd2.h"
+#include "link/fault_scan.h"
 #include <gtk/gtk.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -73,13 +74,14 @@ static void format_sample(const LinkObd2Sample *sample, char *out, size_t size)
 }
 
 static void append_dtcs(GtkWidget *card, const char *prefix,
-                        const LinkObd2DtcList *list)
+                        const LinkObd2DtcList *list, bool complete)
 {
     size_t index;
     if (list->count == 0U) {
         char key[48];
         (void)snprintf(key, sizeof(key), "%s faults", prefix);
-        link_gtk_card_append_detail(card, key, "None reported");
+        link_gtk_card_append_detail(
+            card, key, complete ? "None reported" : "Scan not complete");
         return;
     }
     for (index = 0U; index < list->count; ++index) {
@@ -210,12 +212,56 @@ static void append_faults(GtkWidget *body, ProductContext *context)
     GtkWidget *card = link_gtk_card_new(
         "FAULT MEMORY",
         "Stored, pending and permanent standard diagnostic faults");
-    if (!context->diagnostic_valid) {
+    bool active = false;
+    bool complete = false;
+    bool failed = false;
+    bool started = false;
+    size_t fault_count = 0U;
+    LinkFaultScanPresentationState state;
+
+    if (context->diagnostic_valid) {
+        active =
+            context->diagnostic.stage == LINK_DIAGNOSTIC_FLOW_SCANNING_STORED_DTCS ||
+            context->diagnostic.stage == LINK_DIAGNOSTIC_FLOW_SCANNING_PENDING_DTCS ||
+            context->diagnostic.stage == LINK_DIAGNOSTIC_FLOW_SCANNING_PERMANENT_DTCS;
+        complete = context->diagnostic.standard_dtc_inventory_complete;
+        failed = context->diagnostic.stage == LINK_DIAGNOSTIC_FLOW_FAILED && !complete;
+        started = active || complete || failed;
+        fault_count = context->diagnostic.stored_dtcs.count +
+            context->diagnostic.pending_dtcs.count +
+            context->diagnostic.permanent_dtcs.count;
+    }
+
+    state = link_fault_scan_presentation_state(
+        started, active, complete, failed, fault_count);
+    switch (state) {
+    case LINK_FAULT_SCAN_NOT_SCANNED:
         link_gtk_card_append_status(card, "Not scanned", "state-warning");
-    } else {
-        append_dtcs(card, "Stored", &context->diagnostic.stored_dtcs);
-        append_dtcs(card, "Pending", &context->diagnostic.pending_dtcs);
-        append_dtcs(card, "Permanent", &context->diagnostic.permanent_dtcs);
+        break;
+    case LINK_FAULT_SCAN_IN_PROGRESS:
+        link_gtk_card_append_status(card, "Scanning", "state-warning");
+        break;
+    case LINK_FAULT_SCAN_FAILED:
+        link_gtk_card_append_status(card, "Fault scan failed", "state-warning");
+        break;
+    case LINK_FAULT_SCAN_CLEAN:
+        link_gtk_card_append_status(card, "Clean", "state-success");
+        break;
+    case LINK_FAULT_SCAN_FAULTS_PRESENT:
+        link_gtk_card_append_status(card, "Faults present", "state-warning");
+        break;
+    }
+
+    if (state != LINK_FAULT_SCAN_NOT_SCANNED) {
+        const bool inventory_complete =
+            state == LINK_FAULT_SCAN_CLEAN ||
+            state == LINK_FAULT_SCAN_FAULTS_PRESENT;
+        append_dtcs(card, "Stored", &context->diagnostic.stored_dtcs,
+                    inventory_complete);
+        append_dtcs(card, "Pending", &context->diagnostic.pending_dtcs,
+                    inventory_complete);
+        append_dtcs(card, "Permanent", &context->diagnostic.permanent_dtcs,
+                    inventory_complete);
     }
     gtk_box_append(GTK_BOX(body), card);
 }

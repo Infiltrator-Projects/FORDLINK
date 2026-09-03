@@ -10,13 +10,13 @@
 		A00000000000000000000001 /* FORDLINK/FORDLINKApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000001 /* FORDLINK/FORDLINKApp.swift */; };
 		A00000000000000000000002 /* FORDLINK/ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000002 /* FORDLINK/ContentView.swift */; };
 		A00000000000000000000003 /* FORDLINK/ConnectionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000003 /* FORDLINK/ConnectionViewModel.swift */; };
-		A00000000000000000000004 /* ../../platform/apple/FordLinkBLETransport.m in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000007 /* ../../platform/apple/FordLinkBLETransport.m */; };
+		A00000000000000000000004 /* ../../src/link/platform/apple/LinkBLETransport.m in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000007 /* ../../src/link/platform/apple/LinkBLETransport.m */; };
 		A00000000000000000000005 /* ../../platform/apple/FordLinkDiagnosticsController.m in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000009 /* ../../platform/apple/FordLinkDiagnosticsController.m */; };
 		A00000000000000000000024 /* ../../src/link/platform/apple/LinkDiagnosticsController.m in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000024 /* ../../src/link/platform/apple/LinkDiagnosticsController.m */; };
 		A00000000000000000000025 /* ../../src/link/platform/apple/LinkDiagnosticUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000025 /* ../../src/link/platform/apple/LinkDiagnosticUI.swift */; };
 		A00000000000000000000010 /* ../../src/fordlink.c in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000010 /* ../../src/fordlink.c */; };
-		A00000000000000000000017 /* ../../src/uds/uds.c in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000017 /* ../../src/uds/uds.c */; };
-		A00000000000000000000022 /* ../../src/obd2/obd2.c in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000022 /* ../../src/obd2/obd2.c */; };
+		A00000000000000000000017 /* ../../src/link/platform/apple/LinkPortableUds.c in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000017 /* ../../src/link/platform/apple/LinkPortableUds.c */; };
+		A00000000000000000000022 /* ../../src/link/platform/apple/LinkPortableObd2.c in Sources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000022 /* ../../src/link/platform/apple/LinkPortableObd2.c */; };
 		A00000000000000000000030 /* CoreBluetooth.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B00000000000000000000030 /* CoreBluetooth.framework */; };
 		A00000000000000000000031 /* libInfiltratrCommonPortable.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C0A110000000000000000005 /* libInfiltratrCommonPortable.a */; };
 		A00000000000000000000032 /* FORDLINK/Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B00000000000000000000032 /* FORDLINK/Assets.xcassets */; };
@@ -44,16 +44,14 @@
 		B00000000000000000000002 /* FORDLINK/ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FORDLINK/ContentView.swift; sourceTree = SOURCE_ROOT; };
 		B00000000000000000000003 /* FORDLINK/ConnectionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FORDLINK/ConnectionViewModel.swift; sourceTree = SOURCE_ROOT; };
 		B00000000000000000000004 /* FORDLINK/FORDLINK-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "FORDLINK/FORDLINK-Bridging-Header.h"; sourceTree = SOURCE_ROOT; };
-		B00000000000000000000005 /* ../../platform/apple/FordLinkBLETransport.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ../../platform/apple/FordLinkBLETransport.h; sourceTree = SOURCE_ROOT; };
-		B00000000000000000000006 /* ../../platform/apple/FordLinkBLETransport+FORDLINK.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "../../platform/apple/FordLinkBLETransport+FORDLINK.h"; sourceTree = SOURCE_ROOT; };
-		B00000000000000000000007 /* ../../platform/apple/FordLinkBLETransport.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ../../platform/apple/FordLinkBLETransport.m; sourceTree = SOURCE_ROOT; };
+		B00000000000000000000007 /* ../../src/link/platform/apple/LinkBLETransport.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ../../src/link/platform/apple/LinkBLETransport.m; sourceTree = SOURCE_ROOT; };
 		B00000000000000000000008 /* ../../platform/apple/FordLinkDiagnosticsController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ../../platform/apple/FordLinkDiagnosticsController.h; sourceTree = SOURCE_ROOT; };
 		B00000000000000000000009 /* ../../platform/apple/FordLinkDiagnosticsController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ../../platform/apple/FordLinkDiagnosticsController.m; sourceTree = SOURCE_ROOT; };
 		B00000000000000000000024 /* ../../src/link/platform/apple/LinkDiagnosticsController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ../../src/link/platform/apple/LinkDiagnosticsController.m; sourceTree = SOURCE_ROOT; };
 		B00000000000000000000025 /* ../../src/link/platform/apple/LinkDiagnosticUI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ../../src/link/platform/apple/LinkDiagnosticUI.swift; sourceTree = SOURCE_ROOT; };
 		B00000000000000000000010 /* ../../src/fordlink.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = ../../src/fordlink.c; sourceTree = SOURCE_ROOT; };
-		B00000000000000000000017 /* ../../src/uds/uds.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = ../../src/uds/uds.c; sourceTree = SOURCE_ROOT; };
-		B00000000000000000000022 /* ../../src/obd2/obd2.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = ../../src/obd2/obd2.c; sourceTree = SOURCE_ROOT; };
+		B00000000000000000000017 /* ../../src/link/platform/apple/LinkPortableUds.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = ../../src/link/platform/apple/LinkPortableUds.c; sourceTree = SOURCE_ROOT; };
+		B00000000000000000000022 /* ../../src/link/platform/apple/LinkPortableObd2.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = ../../src/link/platform/apple/LinkPortableObd2.c; sourceTree = SOURCE_ROOT; };
 		B00000000000000000000030 /* CoreBluetooth.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreBluetooth.framework; path = System/Library/Frameworks/CoreBluetooth.framework; sourceTree = SDKROOT; };
 		B00000000000000000000032 /* FORDLINK/Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = FORDLINK/Assets.xcassets; sourceTree = SOURCE_ROOT; };
 		B00000000000000000000040 /* FORDLINK.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FORDLINK.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -100,9 +98,7 @@
 		E00000000000000000000003 /* Apple Platform */ = {
 			isa = PBXGroup;
 			children = (
-				B00000000000000000000005 /* ../../platform/apple/FordLinkBLETransport.h */,
-				B00000000000000000000006 /* ../../platform/apple/FordLinkBLETransport+FORDLINK.h */,
-				B00000000000000000000007 /* ../../platform/apple/FordLinkBLETransport.m */,
+				B00000000000000000000007 /* ../../src/link/platform/apple/LinkBLETransport.m */,
 				B00000000000000000000008 /* ../../platform/apple/FordLinkDiagnosticsController.h */,
 				B00000000000000000000009 /* ../../platform/apple/FordLinkDiagnosticsController.m */,
 				B00000000000000000000024 /* ../../src/link/platform/apple/LinkDiagnosticsController.m */,
@@ -115,8 +111,8 @@
 			isa = PBXGroup;
 			children = (
 				B00000000000000000000010 /* ../../src/fordlink.c */,
-				B00000000000000000000017 /* ../../src/uds/uds.c */,
-				B00000000000000000000022 /* ../../src/obd2/obd2.c */,
+				B00000000000000000000017 /* ../../src/link/platform/apple/LinkPortableUds.c */,
+				B00000000000000000000022 /* ../../src/link/platform/apple/LinkPortableObd2.c */,
 			);
 			name = "Portable Core";
 			sourceTree = "<group>";
@@ -154,8 +150,6 @@
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
-
-
 
 /* Begin PBXNativeTarget section */
 		C13732C8E715C9BEE4FA51C9 /* FORDLINK */ = {
@@ -258,13 +252,13 @@
 				A00000000000000000000001 /* FORDLINK/FORDLINKApp.swift in Sources */,
 				A00000000000000000000002 /* FORDLINK/ContentView.swift in Sources */,
 				A00000000000000000000003 /* FORDLINK/ConnectionViewModel.swift in Sources */,
-				A00000000000000000000004 /* ../../platform/apple/FordLinkBLETransport.m in Sources */,
+				A00000000000000000000004 /* ../../src/link/platform/apple/LinkBLETransport.m in Sources */,
 				A00000000000000000000005 /* ../../platform/apple/FordLinkDiagnosticsController.m in Sources */,
 				A00000000000000000000024 /* ../../src/link/platform/apple/LinkDiagnosticsController.m in Sources */,
 				A00000000000000000000025 /* ../../src/link/platform/apple/LinkDiagnosticUI.swift in Sources */,
 				A00000000000000000000010 /* ../../src/fordlink.c in Sources */,
-				A00000000000000000000017 /* ../../src/uds/uds.c in Sources */,
-				A00000000000000000000022 /* ../../src/obd2/obd2.c in Sources */,
+				A00000000000000000000017 /* ../../src/link/platform/apple/LinkPortableUds.c in Sources */,
+				A00000000000000000000022 /* ../../src/link/platform/apple/LinkPortableObd2.c in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -316,6 +310,7 @@
 					"$(inherited)",
 					"FORDLINK_VERSION=\\\"$(MARKETING_VERSION)\\\"",
 					"FORDLINK_BUILD_REVISION=\\\"$(FORDLINK_SOURCE_REVISION)\\\"",
+					"LINK_ENABLE_MERCEDES_ME_NATIVE=0",
 				);
 				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -334,7 +329,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.2.18;
+				MARKETING_VERSION = 0.2.19;
 				FORDLINK_SOURCE_REVISION = unavailable;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.github.InfiltratorProjects.FORDLINK";
@@ -360,6 +355,7 @@
 					"$(inherited)",
 					"FORDLINK_VERSION=\\\"$(MARKETING_VERSION)\\\"",
 					"FORDLINK_BUILD_REVISION=\\\"$(FORDLINK_SOURCE_REVISION)\\\"",
+					"LINK_ENABLE_MERCEDES_ME_NATIVE=0",
 				);
 				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -378,7 +374,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.2.18;
+				MARKETING_VERSION = 0.2.19;
 				FORDLINK_SOURCE_REVISION = unavailable;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.github.InfiltratorProjects.FORDLINK";
 				PRODUCT_NAME = "$(TARGET_NAME)";

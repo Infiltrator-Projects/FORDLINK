@@ -13,40 +13,36 @@ Reusable transport and protocol code belongs in
 OBD-II/J1979, UDS, KWP where shared, diagnostic flow, adapters/transports and
 portable platform support.
 
-This repository deliberately starts small. Manufacturer-specific behaviour
-must be evidence-backed rather than guessed or copied from another brand.
+Manufacturer-specific behaviour must be evidence-backed rather than guessed or
+copied from another brand.
 
 ## Dependency
 
-The `src/link` gitlink pins a tested LINK release. Product code must consume
-that pin rather than duplicate LINK sources.
+The `src/link` gitlink pins the tested LINK release consumed by FORDLINK. The
+product build uses LINK's shared implementation directly rather than copying
+standard OBD-II, UDS, transport, Apple platform or generic diagnostic code into
+FORDLINK-owned compatibility layers.
 
-## Baseline functionality
+The product smoke test verifies the expected LINK version at build time, while
+LINK's own CI owns regression coverage for the generic standards engine.
 
-Even before Ford-specific definitions are added, FORDLINK is already a
-functional **standard OBD-II core** because it consumes the pinned LINK
-diagnostic engine.
+## Standard diagnostics
 
-That baseline includes standard supported-PID discovery, current-data PID
-request construction and decoding, freeze-frame reads, readiness, VIN,
-stored/pending/permanent DTC reads, generic SAE DTC decoding/knowledge, and
-LINK's standard OBDonUDS mapping. See `docs/OBD2.md` and `docs/GENERIC_BASELINE.md`.
+FORDLINK inherits its standards-based diagnostic foundation from LINK:
+supported-PID discovery, current and freeze-frame data, readiness, VIN,
+stored/pending/permanent DTC inventory, generic SAE DTC knowledge, OBDonUDS,
+ISO-TP, UDS, KWP where applicable, adapter capability modelling, telemetry,
+evidence and read-only safety policy.
 
-CI exercises this inherited OBD path directly so FORDLINK cannot silently
-become a brand shell that no longer exposes LINK's standard diagnostics.
-
-## Status
-
-Generic diagnostic baseline: **available through LINK** — adapter capability modelling, ELM327 sessions/CAN, standard OBD-II, ISO-TP, UDS, DoIP framing, read-only discovery safety, parameters/scheduling, telemetry/evidence and transport-neutral diagnostic requests.
-
-Ford-specific/proprietary vehicle coverage: not claimed yet; it will be added
-here only from evidence-backed Ford data.
+Fault presentation also follows LINK's shared scan-state contract. An empty DTC
+list is presented as clean only after the standard fault inventory completed
+successfully; not-scanned, scanning and failed outcomes remain distinct.
 
 ## Ford network model
 
-FORDLINK now has an explicit Ford network taxonomy rather than treating every
-module as one generic CAN responder. HS-CAN is modelled as the standard OBD
-lane, MS-CAN as a separate enhanced-diagnostics lane requiring explicit adapter
+FORDLINK has an explicit Ford network taxonomy rather than treating every module
+as one generic CAN responder. HS-CAN is modelled as the standard OBD lane,
+MS-CAN as a separate enhanced-diagnostics lane requiring explicit adapter
 support, and additional Ford CAN lanes are represented as profile-specific
 networks whose physical details must come from verified vehicle evidence.
 

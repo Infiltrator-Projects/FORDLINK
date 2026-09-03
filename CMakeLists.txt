@@ -36,15 +36,12 @@ target_compile_definitions(fordlink-core PRIVATE FORDLINK_VERSION="${PROJECT_VER
 target_link_libraries(fordlink-core PUBLIC LINK::Core)
 
 add_executable(fordlink-smoke tests/test_smoke.c)
-target_compile_definitions(fordlink-smoke PRIVATE FORDLINK_EXPECTED_VERSION="${PROJECT_VERSION}")
+target_compile_definitions(fordlink-smoke PRIVATE
+  FORDLINK_EXPECTED_VERSION="${PROJECT_VERSION}"
+  FORDLINK_EXPECTED_LINK_VERSION="0.14.92")
 target_link_libraries(fordlink-smoke PRIVATE FORDLINK::Core)
 add_test(NAME fordlink-smoke COMMAND fordlink-smoke)
-add_executable(fordlink-obd2 tests/test_obd2.c)
-target_link_libraries(fordlink-obd2 PRIVATE FORDLINK::Core)
-add_test(NAME fordlink-obd2 COMMAND fordlink-obd2)
-add_executable(fordlink-generic-diagnostics tests/test_generic_diagnostics.c)
-target_link_libraries(fordlink-generic-diagnostics PRIVATE FORDLINK::Core)
-add_test(NAME fordlink-generic-diagnostics COMMAND fordlink-generic-diagnostics)
+
 add_executable(fordlink-network tests/test_network.c)
 target_link_libraries(fordlink-network PRIVATE FORDLINK::Core)
 add_test(NAME fordlink-network COMMAND fordlink-network)
@@ -87,8 +84,7 @@ if(FORDLINK_BUILD_LINUX_GUI)
   install(TARGETS fordlink RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
   install(FILES app/linux/assets/fordlink-emblem.png DESTINATION "${CMAKE_INSTALL_DATADIR}/pixmaps" RENAME fordlink.png)
   install(FILES app/linux/fordlink.desktop DESTINATION "${CMAKE_INSTALL_DATADIR}/applications")
-  install(FILES README.md docs/OBD2.md docs/GENERIC_BASELINE.md docs/FORD_NETWORKS.md
-    docs/FORD_MODULES.md docs/FORD_DATA_MODEL.md
+  install(FILES README.md docs/FORD_NETWORKS.md docs/FORD_MODULES.md docs/FORD_DATA_MODEL.md
     DESTINATION "${CMAKE_INSTALL_DATADIR}/doc/fordlink")
   set(CPACK_GENERATOR "DEB")
   set(CPACK_PACKAGE_NAME "fordlink")

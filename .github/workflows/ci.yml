@@ -26,6 +26,26 @@ jobs:
           test "$link_sha" = "$(git -C src/link rev-parse HEAD)"
           link_version="$(tr -d '[:space:]' < src/link/VERSION)"
           grep -Fq "#define LINK_VERSION_STRING \"$link_version\"" src/link/include/link/version.h
+      - name: Verify LINK ownership boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          test ! -e include/fordlink/diagnostics.h
+          test ! -e include/fordlink/obd2.h
+          test ! -e tests/test_generic_diagnostics.c
+          test ! -e tests/test_obd2.c
+          test ! -e src/obd2/obd2.c
+          test ! -e src/uds/uds.c
+          test ! -e platform/apple/FordLinkBLETransport.m
+          test ! -e platform/apple/FordLinkBLETransport.h
+          test ! -e platform/apple/FordLinkBLETransport+FORDLINK.h
+          ! grep -Fq 'mercedes_me_' src/fordlink.c
+          grep -Fq 'LinkPortableCore.c' src/fordlink.c
+          grep -Fq 'LinkPortableObd2.c' app/ios/FORDLINK.xcodeproj/project.pbxproj
+          grep -Fq 'LinkPortableUds.c' app/ios/FORDLINK.xcodeproj/project.pbxproj
+          grep -Fq 'LINK_ENABLE_MERCEDES_ME_NATIVE=0' app/ios/FORDLINK.xcodeproj/project.pbxproj
+          grep -Fq 'link_fault_scan_presentation_state' app/linux/main.c
+          grep -Fq 'faultScanPresentationStateName' app/ios/FORDLINK/ConnectionViewModel.swift
       - run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
       - run: cmake --build build --parallel
       - run: ctest --test-dir build --output-on-failure

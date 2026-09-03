@@ -238,8 +238,6 @@ struct ContentView: View {
     private var supportingTools: some View {
         EmptyView()
     }
-
-
 }
 
 private struct ProductVehicleView: View {
@@ -328,7 +326,7 @@ private struct ProductModulesView: View {
                         .foregroundStyle(ProductTheme.secondary)
                 }
                 LinkLabeledPanel(title: "Ford module catalogue", systemImage: "books.vertical.fill") {
-                    Text("(model.fordModuleCatalogueRows.count) module families available before connection")
+                    Text("\(model.fordModuleCatalogueRows.count) module families available before connection")
                         .font(.caption.bold())
                         .foregroundStyle(ProductTheme.secondary)
                     ForEach(model.fordModuleCatalogueRows, id: \.self) { row in
@@ -360,6 +358,17 @@ private struct ProductModulesView: View {
 private struct ProductFaultsView: View {
     @ObservedObject var model: ConnectionViewModel
     private var total: Int { model.storedDTCs.count + model.pendingDTCs.count + model.permanentDTCs.count }
+    private var faultScanComplete: Bool {
+        model.faultScanPresentationStateName == "clean" ||
+            model.faultScanPresentationStateName == "faults-present"
+    }
+    private var faultCountColour: Color {
+        switch model.faultScanPresentationStateName {
+        case "clean": return ProductTheme.success
+        case "faults-present", "failed": return ProductTheme.fault
+        default: return ProductTheme.warning
+        }
+    }
 
     var body: some View {
         ScrollView {
@@ -370,9 +379,9 @@ private struct ProductFaultsView: View {
                             .font(.subheadline)
                             .foregroundStyle(ProductTheme.secondary)
                         Spacer()
-                        Text("\(total)")
+                        Text(faultScanComplete ? "\(total)" : "—")
                             .font(.title2.monospacedDigit().weight(.bold))
-                            .foregroundStyle(total == 0 ? ProductTheme.success : ProductTheme.fault)
+                            .foregroundStyle(faultCountColour)
                     }
                     faultGroup("Stored", model.storedDTCs)
                     faultGroup("Pending", model.pendingDTCs)
@@ -391,7 +400,7 @@ private struct ProductFaultsView: View {
                 .font(.caption.bold())
                 .foregroundStyle(ProductTheme.secondary)
             if values.isEmpty {
-                Text("None reported")
+                Text(faultScanComplete ? "None reported" : "Scan not complete")
                     .font(.subheadline)
                     .foregroundStyle(ProductTheme.secondary)
             } else {
@@ -436,18 +445,23 @@ private struct ProductTableView: View {
 private struct ProductDashboardView: View {
     @ObservedObject var model: ConnectionViewModel
     private var totalFaults: Int { model.storedDTCs.count + model.pendingDTCs.count + model.permanentDTCs.count }
+    private var faultMetricText: String {
+        let state = model.faultScanPresentationStateName
+        return state == "clean" || state == "faults-present"
+            ? "\(totalFaults)" : "—"
+    }
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 15) {
                 LinkLabeledPanel(title: "At a glance", systemImage: "gauge.with.dots.needle.67percent") {
                     HStack(spacing: 10) {
-                        productMetric("(model.fordModuleRows.count)", "Detected modules", "cpu")
-                        productMetric("(totalFaults)", "Faults", "exclamationmark.triangle")
+                        productMetric("\(model.fordModuleRows.count)", "Detected modules", "cpu")
+                        productMetric(faultMetricText, "Faults", "exclamationmark.triangle")
                     }
                     HStack(spacing: 10) {
-                        productMetric("(model.recordedSampleCount)", "Samples", "waveform")
-                        productMetric("(model.fordProcedureCapabilityRows.count)", "Procedures", "wrench")
+                        productMetric("\(model.recordedSampleCount)", "Samples", "waveform")
+                        productMetric("\(model.fordProcedureCapabilityRows.count)", "Procedures", "wrench")
                     }
                     productDivider
                     productValueRow("Session", model.isReady ? "Live diagnostics active" : model.statusText, icon: "dot.radiowaves.left.and.right")

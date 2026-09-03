@@ -9,6 +9,7 @@ final class ConnectionViewModel: NSObject, ObservableObject, @preconcurrency For
     @Published private(set) var adapterIdentifier = "Unknown"
     @Published private(set) var vehicleVINText = "Waiting for standard VIN"
     @Published private(set) var faultScanStatusText = "Not scanned"
+    @Published private(set) var faultScanPresentationStateName = "not-scanned"
     @Published private(set) var storedDTCs = [String]()
     @Published private(set) var pendingDTCs = [String]()
     @Published private(set) var permanentDTCs = [String]()
@@ -103,6 +104,7 @@ final class ConnectionViewModel: NSObject, ObservableObject, @preconcurrency For
         adapterIdentifier = controller.adapterIdentifier ?? "Unknown"
         vehicleVINText = controller.vehicleVINText
         faultScanStatusText = controller.faultScanStatusText
+        faultScanPresentationStateName = controller.faultScanPresentationStateName
         storedDTCs = controller.storedDTCs
         pendingDTCs = controller.pendingDTCs
         permanentDTCs = controller.permanentDTCs

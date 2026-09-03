@@ -15,6 +15,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property(nonatomic, copy, readonly, nullable) NSString *adapterIdentifier;
 @property(nonatomic, copy, readonly) NSString *vehicleVINText;
 @property(nonatomic, copy, readonly) NSString *faultScanStatusText;
+@property(nonatomic, copy, readonly) NSString *faultScanPresentationStateName;
 @property(nonatomic, copy, readonly) NSArray<NSString *> *storedDTCs;
 @property(nonatomic, copy, readonly) NSArray<NSString *> *pendingDTCs;
 @property(nonatomic, copy, readonly) NSArray<NSString *> *permanentDTCs;

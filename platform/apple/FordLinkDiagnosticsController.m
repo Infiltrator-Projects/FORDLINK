@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 #import "FordLinkDiagnosticsController.h"
+#import "link/fault_scan.h"
 #import "link/obd2.h"
 #import "fordlink/module_scan.h"
 #import "fordlink/procedure.h"
@@ -47,6 +48,31 @@
     return @"Waiting for standard VIN";
 }
 - (NSString *)faultScanStatusText { return self.shared.faultScanStatusText; }
+- (NSString *)faultScanPresentationStateName
+{
+    const LinkDiagnosticFlow *flow = [self.shared diagnosticFlow];
+    size_t faultCount = self.shared.storedDTCs.count +
+        self.shared.pendingDTCs.count + self.shared.permanentDTCs.count;
+    bool active = false;
+    bool complete = false;
+    bool failed = false;
+    bool started = false;
+
+    if (flow != NULL) {
+        active = flow->stage == LINK_DIAGNOSTIC_FLOW_SCANNING_STORED_DTCS ||
+            flow->stage == LINK_DIAGNOSTIC_FLOW_SCANNING_PENDING_DTCS ||
+            flow->stage == LINK_DIAGNOSTIC_FLOW_SCANNING_PERMANENT_DTCS;
+        complete = flow->standard_dtc_inventory_complete;
+        failed = flow->stage == LINK_DIAGNOSTIC_FLOW_FAILED && !complete;
+        started = active || complete || failed;
+    }
+
+    LinkFaultScanPresentationState state =
+        link_fault_scan_presentation_state(
+            started, active, complete, failed, faultCount);
+    return [NSString stringWithUTF8String:
+        link_fault_scan_presentation_state_name(state)];
+}
 - (NSArray<NSString *> *)storedDTCs { return self.shared.storedDTCs; }
 - (NSArray<NSString *> *)pendingDTCs { return self.shared.pendingDTCs; }
 - (NSArray<NSString *> *)permanentDTCs { return self.shared.permanentDTCs; }
