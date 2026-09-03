@@ -675,7 +675,7 @@ private func productTrace(
                         else { path.addLine(to: CGPoint(x: x, y: y)) }
                     }
                 }
-                .stroke(ProductTheme.accent, style: StrokeStyle(lineWidth: 2, lineJoin: .round, lineCap: .round))
+                .stroke(ProductTheme.accent, style: StrokeStyle(lineWidth: 2, lineCap: .round, lineJoin: .round))
                 if values.isEmpty {
                     Text("waiting for samples")
                         .font(.caption2)
