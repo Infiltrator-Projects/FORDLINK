@@ -23,6 +23,11 @@ final class ConnectionViewModel: NSObject, ObservableObject, @preconcurrency For
     @Published private(set) var fordModuleSummary = "Connect to scan Ford modules"
     @Published private(set) var fordModuleRows = [String]()
     @Published private(set) var fordProcedureCapabilityRows = [String]()
+    @Published private(set) var fordModuleCatalogueRows = [String]()
+    @Published private(set) var rpmHistory = [Double]()
+    @Published private(set) var speedHistory = [Double]()
+    @Published private(set) var coolantHistory = [Double]()
+    @Published private(set) var throttleHistory = [Double]()
     @Published private(set) var isActive = false
     @Published private(set) var isReady = false
     @Published private(set) var recordedSampleCount = 0
@@ -78,6 +83,11 @@ final class ConnectionViewModel: NSObject, ObservableObject, @preconcurrency For
         fordModuleSummary = controller.fordModuleSummary
         fordModuleRows = controller.fordModuleRows
         fordProcedureCapabilityRows = controller.fordProcedureCapabilityRows
+        fordModuleCatalogueRows = controller.fordModuleCatalogueRows
+        rpmHistory = controller.rpmHistory.map { $0.doubleValue }
+        speedHistory = controller.speedHistory.map { $0.doubleValue }
+        coolantHistory = controller.coolantHistory.map { $0.doubleValue }
+        throttleHistory = controller.throttleHistory.map { $0.doubleValue }
         isActive = controller.isActive
         isReady = controller.isReady
         recordedSampleCount = Int(clamping: controller.recordedSampleCount)

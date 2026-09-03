@@ -29,6 +29,11 @@ NS_ASSUME_NONNULL_BEGIN
 @property(nonatomic, copy, readonly) NSString *fordModuleSummary;
 @property(nonatomic, copy, readonly) NSArray<NSString *> *fordModuleRows;
 @property(nonatomic, copy, readonly) NSArray<NSString *> *fordProcedureCapabilityRows;
+@property(nonatomic, copy, readonly) NSArray<NSString *> *fordModuleCatalogueRows;
+@property(nonatomic, copy, readonly) NSArray<NSNumber *> *rpmHistory;
+@property(nonatomic, copy, readonly) NSArray<NSNumber *> *speedHistory;
+@property(nonatomic, copy, readonly) NSArray<NSNumber *> *coolantHistory;
+@property(nonatomic, copy, readonly) NSArray<NSNumber *> *throttleHistory;
 @property(nonatomic, readonly, getter=isActive) BOOL active;
 @property(nonatomic, readonly, getter=isReady) BOOL ready;
 @property(nonatomic, readonly) NSUInteger recordedSampleCount;

@@ -149,7 +149,11 @@ struct ContentView: View {
                         }
                     }
                 } else if !model.isActive {
-                    Text("Connect once to identify the standard diagnostic surface, faults, responders and live data.")
+                    HStack(spacing: 10) {
+                        productMetric("(model.fordModuleCatalogueRows.count)", "Ford modules", "cpu")
+                        productMetric("(model.fordProcedureCapabilityRows.count)", "Service/test families", "wrench.and.screwdriver")
+                    }
+                    Text("FORDLINK is ready to scan Ford networks and merge live vehicle evidence with the built-in catalogue.")
                         .font(.caption)
                         .foregroundStyle(ProductTheme.secondary)
                 }
@@ -288,6 +292,18 @@ private struct ProductModulesView: View {
                         .font(.caption2)
                         .foregroundStyle(ProductTheme.secondary)
                 }
+                LinkLabeledPanel(title: "Ford module catalogue", systemImage: "books.vertical.fill") {
+                    Text("(model.fordModuleCatalogueRows.count) module families available before connection")
+                        .font(.caption.bold())
+                        .foregroundStyle(ProductTheme.secondary)
+                    ForEach(model.fordModuleCatalogueRows, id: \.self) { row in
+                        productDivider
+                        Text(row)
+                            .font(.caption.monospaced())
+                            .foregroundStyle(ProductTheme.primary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                }
                 LinkLabeledPanel(title: "Standard responders", systemImage: "square.stack.3d.up.fill") {
                     productValueRow("Physical responders", model.standardResponderSummary, icon: "point.3.connected.trianglepath.dotted")
                     productDivider
@@ -390,19 +406,24 @@ private struct ProductDashboardView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 15) {
                 LinkLabeledPanel(title: "At a glance", systemImage: "gauge.with.dots.needle.67percent") {
+                    HStack(spacing: 10) {
+                        productMetric("(model.fordModuleRows.count)", "Detected modules", "cpu")
+                        productMetric("(totalFaults)", "Faults", "exclamationmark.triangle")
+                    }
+                    HStack(spacing: 10) {
+                        productMetric("(model.recordedSampleCount)", "Samples", "waveform")
+                        productMetric("(model.fordProcedureCapabilityRows.count)", "Procedures", "wrench")
+                    }
+                    productDivider
                     productValueRow("Session", model.isReady ? "Live diagnostics active" : model.statusText, icon: "dot.radiowaves.left.and.right")
                     productDivider
                     productValueRow("Readiness", model.readinessStatusText, icon: "checklist")
-                    productDivider
-                    productValueRow("Fault records", "\(totalFaults)", icon: "exclamationmark.triangle")
-                    productDivider
-                    productValueRow("Samples recorded", "\(model.recordedSampleCount)", icon: "waveform")
                 }
 
                 LinkLabeledPanel(title: "Live highlights", systemImage: "speedometer") {
                     let highlights = Array(model.standardLiveRows.prefix(6))
                     if highlights.isEmpty {
-                        Text("No live measurements yet.")
+                        Text("Live channels are ready; connect to populate values.")
                             .font(.subheadline)
                             .foregroundStyle(ProductTheme.secondary)
                     } else {
@@ -421,7 +442,7 @@ private struct ProductDashboardView: View {
     }
 }
 
-private struct ProductEvidenceView: View {
+private struct ProductEvidenceView: View {private struct ProductEvidenceView: View {
     @ObservedObject var model: ConnectionViewModel
 
     var body: some View {
@@ -464,23 +485,19 @@ private struct ProductGraphView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 15) {
-                LinkLabeledPanel(title: "Graph", systemImage: "chart.xyaxis.line") {
-                    productValueRow("Recorded samples", "\(model.recordedSampleCount)", icon: "waveform")
-                    productDivider
-                    if model.standardLiveRows.isEmpty {
-                        Text("Collect live samples to populate graphable parameters.")
-                            .font(.subheadline)
-                            .foregroundStyle(ProductTheme.secondary)
-                    } else {
-                        ForEach(Array(model.standardLiveRows.prefix(6)), id: \.self) { row in
-                            Text(row)
-                                .font(.subheadline.monospacedDigit())
-                                .foregroundStyle(ProductTheme.primary)
-                        }
-                    }
-                    Text("This task is reserved for time-series presentation from LINK telemetry history; no synthetic trace is drawn.")
+                LinkLabeledPanel(title: "Live graphs", systemImage: "chart.xyaxis.line") {
+                    Text(model.isActive
+                         ? "Live LINK telemetry · newest sample at right"
+                         : "Connect to populate the traces; graph channels are already configured.")
                         .font(.caption)
                         .foregroundStyle(ProductTheme.secondary)
+                    productTrace("Engine RPM", "rpm", model.rpmHistory, 0...7000)
+                    productDivider
+                    productTrace("Vehicle speed", "km/h", model.speedHistory, 0...220)
+                    productDivider
+                    productTrace("Coolant temperature", "°C", model.coolantHistory, -40...130)
+                    productDivider
+                    productTrace("Throttle position", "%", model.throttleHistory, 0...100)
                 }
             }
             .padding(16)
@@ -489,7 +506,7 @@ private struct ProductGraphView: View {
     }
 }
 
-private struct ProductTestsView: View {
+private struct ProductTestsView: View {private struct ProductTestsView: View {
     @ObservedObject var model: ConnectionViewModel
 
     var body: some View {
@@ -546,10 +563,23 @@ private struct ProductServicesView: View {
                         .font(.caption.bold())
                         .foregroundStyle(ProductTheme.secondary)
                     ForEach(model.fordProcedureCapabilityRows, id: \.self) { row in
-                        Text(row)
-                            .font(.caption)
-                            .foregroundStyle(ProductTheme.secondary)
-                            .fixedSize(horizontal: false, vertical: true)
+                        HStack(alignment: .top, spacing: 9) {
+                            Image(systemName: "wrench.adjustable.fill")
+                                .foregroundStyle(ProductTheme.accent)
+                                .frame(width: 20)
+                            Text(row)
+                                .font(.caption)
+                                .foregroundStyle(ProductTheme.primary)
+                                .fixedSize(horizontal: false, vertical: true)
+                            Spacer(minLength: 0)
+                            Image(systemName: "lock.fill")
+                                .font(.caption2)
+                                .foregroundStyle(ProductTheme.secondary)
+                        }
+                        .padding(9)
+                        .background(
+                            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                                .fill(ProductTheme.panelRaised.opacity(0.65)))
                     }
                     Text("These are recognised Ford procedure families, not enabled commands. A procedure becomes executable only after its module, session, security and preconditions are verified.")
                         .font(.caption)
@@ -583,6 +613,77 @@ private struct ProductSettingsView: View {
             .padding(16)
         }
         .productDiagnosticScreen("Settings")
+    }
+}
+
+private func productMetric(_ value: String, _ label: String, _ icon: String) -> some View {
+    VStack(alignment: .leading, spacing: 6) {
+        HStack {
+            Image(systemName: icon).foregroundStyle(ProductTheme.accent)
+            Spacer()
+        }
+        Text(value)
+            .font(.title2.monospacedDigit().weight(.bold))
+            .foregroundStyle(ProductTheme.primary)
+        Text(label)
+            .font(.caption2.bold())
+            .foregroundStyle(ProductTheme.secondary)
+    }
+    .frame(maxWidth: .infinity, alignment: .leading)
+    .padding(11)
+    .background(
+        RoundedRectangle(cornerRadius: 12, style: .continuous)
+            .fill(ProductTheme.panelRaised.opacity(0.72)))
+    .overlay(
+        RoundedRectangle(cornerRadius: 12, style: .continuous)
+            .stroke(ProductTheme.border.opacity(0.55), lineWidth: 1))
+}
+
+private func productTrace(
+    _ title: String,
+    _ unit: String,
+    _ values: [Double],
+    _ nominalRange: ClosedRange<Double>
+) -> some View {
+    VStack(alignment: .leading, spacing: 7) {
+        HStack {
+            Text(title)
+                .font(.subheadline.bold())
+                .foregroundStyle(ProductTheme.primary)
+            Spacer()
+            Text(values.last.map { String(format: "%.1f %@", $0, unit) } ?? "—")
+                .font(.caption.monospacedDigit().bold())
+                .foregroundStyle(ProductTheme.accent)
+        }
+        GeometryReader { geometry in
+            ZStack {
+                RoundedRectangle(cornerRadius: 9, style: .continuous)
+                    .fill(ProductTheme.panelRaised.opacity(0.55))
+                Path { path in
+                    let count = max(values.count, 2)
+                    let width = max(geometry.size.width - 12, 1)
+                    let height = max(geometry.size.height - 12, 1)
+                    let lo = nominalRange.lowerBound
+                    let hi = nominalRange.upperBound
+                    guard !values.isEmpty, hi > lo else { return }
+                    for (index, raw) in values.enumerated() {
+                        let x = 6 + CGFloat(index) / CGFloat(count - 1) * width
+                        let clipped = min(max(raw, lo), hi)
+                        let norm = (clipped - lo) / (hi - lo)
+                        let y = 6 + (1 - CGFloat(norm)) * height
+                        if index == 0 { path.move(to: CGPoint(x: x, y: y)) }
+                        else { path.addLine(to: CGPoint(x: x, y: y)) }
+                    }
+                }
+                .stroke(ProductTheme.accent, style: StrokeStyle(lineWidth: 2, lineJoin: .round, lineCap: .round))
+                if values.isEmpty {
+                    Text("waiting for samples")
+                        .font(.caption2)
+                        .foregroundStyle(ProductTheme.secondary)
+                }
+            }
+        }
+        .frame(height: 92)
     }
 }
 

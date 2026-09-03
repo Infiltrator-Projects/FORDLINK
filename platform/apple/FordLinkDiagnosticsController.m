@@ -3,6 +3,7 @@
 #import "link/obd2.h"
 #import "fordlink/module_scan.h"
 #import "fordlink/procedure.h"
+#import "fordlink/module.h"
 #include <stdlib.h>
 
 @interface FordLinkDiagnosticsController () <LinkDiagnosticsControllerDelegate>
@@ -116,6 +117,54 @@
             procedure->module_family]];
     }
     return rows;
+}
+
+- (NSArray<NSString *> *)fordModuleCatalogueRows
+{
+    NSMutableArray<NSString *> *rows = [NSMutableArray array];
+    size_t index;
+    for (index = 0U; index < fordlink_module_definition_count(); ++index) {
+        const FordlinkModuleDefinition *module = fordlink_module_definition_at(index);
+        const FordlinkDiagnosticEndpoint *endpoint;
+        NSMutableString *row;
+        size_t occurrence = 0U;
+        if (module == NULL) continue;
+        row = [NSMutableString stringWithFormat:@"%s · %s", module->key, module->name];
+        endpoint = fordlink_diagnostic_endpoint_for_module(module->key, occurrence++);
+        if (endpoint != NULL) {
+            [row appendFormat:@" · 0x%03X/0x%03X · %s",
+                (unsigned int)endpoint->request_id,
+                (unsigned int)endpoint->response_id,
+                fordlink_endpoint_confidence_name(endpoint->confidence)];
+            while ((endpoint = fordlink_diagnostic_endpoint_for_module(
+                        module->key, occurrence++)) != NULL) {
+                [row appendFormat:@" · alt 0x%03X/0x%03X",
+                    (unsigned int)endpoint->request_id,
+                    (unsigned int)endpoint->response_id];
+            }
+        } else {
+            [row appendString:@" · endpoint profile pending"];
+        }
+        [rows addObject:row];
+    }
+    return rows;
+}
+
+- (NSArray<NSNumber *> *)rpmHistory
+{
+    return [self.shared recentValuesForPID:0x0C limit:60U];
+}
+- (NSArray<NSNumber *> *)speedHistory
+{
+    return [self.shared recentValuesForPID:0x0D limit:60U];
+}
+- (NSArray<NSNumber *> *)coolantHistory
+{
+    return [self.shared recentValuesForPID:0x05 limit:60U];
+}
+- (NSArray<NSNumber *> *)throttleHistory
+{
+    return [self.shared recentValuesForPID:0x11 limit:60U];
 }
 
 - (void)start
