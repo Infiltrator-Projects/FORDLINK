@@ -43,7 +43,8 @@ jobs:
           grep -Fq 'LinkPortableCore.c' src/fordlink.c
           grep -Fq 'LinkPortableObd2.c' app/ios/FORDLINK.xcodeproj/project.pbxproj
           grep -Fq 'LinkPortableUds.c' app/ios/FORDLINK.xcodeproj/project.pbxproj
-          grep -Fq 'LINK_ENABLE_MERCEDES_ME_NATIVE=0' app/ios/FORDLINK.xcodeproj/project.pbxproj
+          ! grep -Fq 'LINK_ENABLE_MERCEDES_ME_NATIVE=0' app/ios/FORDLINK.xcodeproj/project.pbxproj
+          grep -Fq 'LINK_ENABLE_MERCEDES_ME_NATIVE=1' app/ios/FORDLINK.xcodeproj/project.pbxproj
           grep -Fq 'link_fault_scan_presentation_state' app/linux/main.c
           grep -Fq 'faultScanPresentationStateName' app/ios/FORDLINK/ConnectionViewModel.swift
       - run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release

@@ -4,22 +4,14 @@
 #include <TargetConditionals.h>
 #endif
 #if defined(__APPLE__) && TARGET_OS_IOS
-#ifndef LINK_ENABLE_MERCEDES_ME_NATIVE
-#define LINK_ENABLE_MERCEDES_ME_NATIVE 0
-#define FORDLINK_DEFINED_LINK_ENABLE_MERCEDES_ME_NATIVE 1
-#endif
 #ifndef LINK_SOURCE_REVISION
-#define LINK_SOURCE_REVISION "3166bb40001cb0c390f6c80554a911b7a12a2e30"
+#define LINK_SOURCE_REVISION "2652ce703168046ca0bb5da51ab271c99b48e655"
 #define FORDLINK_DEFINED_LINK_SOURCE_REVISION 1
 #endif
 #include "link/platform/apple/LinkPortableCore.c"
 #ifdef FORDLINK_DEFINED_LINK_SOURCE_REVISION
 #undef FORDLINK_DEFINED_LINK_SOURCE_REVISION
 #undef LINK_SOURCE_REVISION
-#endif
-#ifdef FORDLINK_DEFINED_LINK_ENABLE_MERCEDES_ME_NATIVE
-#undef FORDLINK_DEFINED_LINK_ENABLE_MERCEDES_ME_NATIVE
-#undef LINK_ENABLE_MERCEDES_ME_NATIVE
 #endif
 /* Xcode compiles one product-owned C translation unit for Ford-specific code. */
 #include "network.c"

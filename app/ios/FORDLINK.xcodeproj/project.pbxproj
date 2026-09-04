@@ -310,7 +310,7 @@
 					"$(inherited)",
 					"FORDLINK_VERSION=\\\"$(MARKETING_VERSION)\\\"",
 					"FORDLINK_BUILD_REVISION=\\\"$(FORDLINK_SOURCE_REVISION)\\\"",
-					"LINK_ENABLE_MERCEDES_ME_NATIVE=0",
+					"LINK_ENABLE_MERCEDES_ME_NATIVE=1",
 				);
 				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -329,7 +329,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.2.19;
+				MARKETING_VERSION = 0.2.20;
 				FORDLINK_SOURCE_REVISION = unavailable;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.github.InfiltratorProjects.FORDLINK";
@@ -355,7 +355,7 @@
 					"$(inherited)",
 					"FORDLINK_VERSION=\\\"$(MARKETING_VERSION)\\\"",
 					"FORDLINK_BUILD_REVISION=\\\"$(FORDLINK_SOURCE_REVISION)\\\"",
-					"LINK_ENABLE_MERCEDES_ME_NATIVE=0",
+					"LINK_ENABLE_MERCEDES_ME_NATIVE=1",
 				);
 				GCC_TREAT_WARNINGS_AS_ERRORS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -374,7 +374,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.2.19;
+				MARKETING_VERSION = 0.2.20;
 				FORDLINK_SOURCE_REVISION = unavailable;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.github.InfiltratorProjects.FORDLINK";
 				PRODUCT_NAME = "$(TARGET_NAME)";

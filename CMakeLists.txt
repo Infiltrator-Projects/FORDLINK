@@ -38,7 +38,7 @@ target_link_libraries(fordlink-core PUBLIC LINK::Core)
 add_executable(fordlink-smoke tests/test_smoke.c)
 target_compile_definitions(fordlink-smoke PRIVATE
   FORDLINK_EXPECTED_VERSION="${PROJECT_VERSION}"
-  FORDLINK_EXPECTED_LINK_VERSION="0.14.93")
+  FORDLINK_EXPECTED_LINK_VERSION="0.14.94")
 target_link_libraries(fordlink-smoke PRIVATE FORDLINK::Core)
 add_test(NAME fordlink-smoke COMMAND fordlink-smoke)
 
