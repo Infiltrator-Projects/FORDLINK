@@ -80,7 +80,7 @@ static bool build_reference_trace(LinkTestElmTraceEntry *entries,
         size_t did_index;
 
         if (endpoint == NULL || !endpoint->scan_hscan_by_default ||
-            endpoint->network != FORDLINK_NETWORK_HSCAN) continue;
+            !fordlink_endpoint_supports_network(endpoint, FORDLINK_NETWORK_HSCAN)) continue;
 
         (void)snprintf(command, sizeof(command), "ATSH%03X",
                        (unsigned int)endpoint->request_id);
