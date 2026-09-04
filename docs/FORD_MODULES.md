@@ -12,12 +12,14 @@ service-information module charts and independently corroborated open
 implementations/captures. Conflicting platform families are retained as
 separate candidates instead of silently choosing one.
 
-The default manufacturer scan currently probes corroborated HS-CAN candidates.
-For each endpoint it asks a bounded set of standard ISO 14229 identification
-DIDs (manufacturer part/software number, serial, VIN, hardware number and
-system name) plus ReadDTCInformation. Every diagnostic PDU passes through
-LINK's read-only Discover policy. No session change, security access, routine,
-reset, DTC clear, configuration write or programming command is permitted.
+The manufacturer module census is explicitly user-triggered after the standard
+diagnostic pass; FORDLINK does not automatically probe Ford module endpoints on
+connection. When requested, it probes the corroborated HS-CAN candidates. For
+each endpoint it asks a bounded set of standard ISO 14229 identification DIDs
+(manufacturer part/software number, serial, VIN, hardware number and system
+name) plus ReadDTCInformation. Every diagnostic PDU passes through LINK's
+read-only Discover policy. No session change, security access, routine, reset,
+DTC clear, configuration write or programming command is permitted.
 
 MS-CAN and additional gateway-exposed networks remain represented but are not
 automatically selected until adapter-level Ford network switching is explicitly

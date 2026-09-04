@@ -152,17 +152,21 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          dispatch_accepted=false
           if [[ -n "${DISPATCH_TOKEN:-}" ]]; then
-            if ! GH_TOKEN="$DISPATCH_TOKEN" gh api --method POST \
+            if GH_TOKEN="$DISPATCH_TOKEN" gh api --method POST \
               repos/Infiltrator-Projects/Infiltrator-Repository/dispatches \
               -f event_type='application-release' \
               -f "client_payload[repository]=$GITHUB_REPOSITORY" \
               -f "client_payload[sha]=$RELEASE_SHA" >/dev/null; then
-              echo "::warning::Immediate APT dispatch failed; waiting for the five-minute safety refresh."
+              dispatch_accepted=true
+            else
+              echo "::warning::Immediate APT dispatch failed; the repository's scheduled safety refresh will publish the release asynchronously."
             fi
           else
-            echo "::warning::Immediate APT dispatch token is unavailable; waiting for the five-minute safety refresh."
+            echo "::warning::Immediate APT dispatch token is unavailable; the repository's scheduled safety refresh will publish the release asynchronously."
           fi
+
           catalogue='https://infiltrator-projects.github.io/Infiltrator-Repository/catalogue/apps.json'
           for attempt in $(seq 1 72); do
             if curl -fsS --retry 2 --retry-delay 1 "$catalogue?release=$RELEASE_SHA&attempt=$attempt" \
@@ -173,5 +177,11 @@ jobs:
             echo "Waiting for APT publication of $APP_ID $VERSION ($attempt/72)..."
             sleep 10
           done
-          echo "::error::GitHub release was published, but APT did not advertise $APP_ID $VERSION within 12 minutes."
-          exit 1
+
+          if [[ "$dispatch_accepted" == true ]]; then
+            echo "::error::Immediate APT dispatch was accepted, but APT did not advertise $APP_ID $VERSION within 12 minutes."
+            exit 1
+          fi
+
+          echo "::warning::GitHub release $VERSION is published and verified; APT publication is pending the asynchronous scheduled safety refresh."
+          exit 0

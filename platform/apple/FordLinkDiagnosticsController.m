@@ -19,7 +19,7 @@
         LinkDiagnosticFlowConfig config = LINK_DIAGNOSTIC_FLOW_CONFIG_INIT;
         config.preserve_pid_discovery_response_headers = true;
         config.preserve_live_response_headers = true;
-        config.manufacturer_extension_after_standard_dtcs = true;
+        config.manufacturer_extension_after_standard_dtcs = false;
         config.restore_adapter_after_manufacturer_extension = true;
         _shared = [[LinkDiagnosticsController alloc]
             initWithProductSlug:@"fordlink"
@@ -97,8 +97,12 @@
     if (self.shared.isManufacturerExtensionActive)
         return [NSString stringWithFormat:@"Scanning Ford modules · %zu detected",
             fordlink_module_scanner_responsive_count(self.fordScanner)];
-    if (fordlink_module_scanner_result_count(self.fordScanner) == 0U)
-        return self.shared.isActive ? @"Ford module scan pending" : @"Connect to scan Ford modules";
+    if (fordlink_module_scanner_result_count(self.fordScanner) == 0U) {
+        if (self.shared.isReady) return @"Ready to scan Ford modules";
+        return self.shared.isActive
+            ? @"Finish standard diagnostics to scan Ford modules"
+            : @"Connect to scan Ford modules";
+    }
     return [NSString stringWithFormat:@"%zu Ford modules detected · %zu endpoints scanned",
         fordlink_module_scanner_responsive_count(self.fordScanner),
         fordlink_module_scanner_result_count(self.fordScanner)];
@@ -236,6 +240,25 @@
         return [self.shared completeManufacturerExtensionRestoringAdapter:YES];
     }
     return YES;
+}
+
+- (BOOL)scanFordModules
+{
+    if (self.fordScanner == NULL || !self.shared.isReady ||
+        self.shared.isManufacturerExtensionActive) {
+        return NO;
+    }
+
+    memset(self.fordScanner, 0, sizeof(*self.fordScanner));
+    if (![self.shared beginLiveManufacturerExtension]) return NO;
+    if (!fordlink_module_scanner_begin(self.fordScanner)) {
+        (void)[self.shared completeManufacturerExtensionRestoringAdapter:YES];
+        return NO;
+    }
+
+    BOOL started = [self driveFordModuleScanner];
+    [self.delegate diagnosticsControllerDidUpdate:self];
+    return started;
 }
 
 - (void)linkDiagnosticsControllerBeginManufacturerExtension:

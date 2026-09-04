@@ -23,6 +23,7 @@ typedef struct {
     LinkObd2Sample samples[256];
     size_t live_sample_count;
     FordlinkModuleScanner ford_scan;
+    bool ford_scan_requested;
     bool ford_scan_started;
     bool ford_scan_complete;
     bool ford_scan_success;
@@ -167,7 +168,9 @@ static void append_modules(GtkWidget *body, ProductContext *context)
         size_t shown = 0U;
         char status[96];
         if (!context->ford_scan_started) {
-            link_gtk_card_append_status(ford, "Pending manufacturer scan", "state-warning");
+            link_gtk_card_append_status(ford, "Ready for requested Ford module scan", "state-warning");
+            link_gtk_card_append_note(ford,
+                "Use SCAN FORD MODULES after the standard diagnostic pass. No Ford module census is sent automatically.");
         } else {
             (void)snprintf(status, sizeof(status), "%zu detected · %zu endpoints scanned",
                 fordlink_module_scanner_responsive_count(&context->ford_scan),
@@ -445,6 +448,8 @@ static void render(size_t section, GtkWidget *body, void *opaque)
 static bool ford_scan_begin(void *opaque)
 {
     ProductContext *context = opaque;
+    if (context == NULL || !context->ford_scan_requested) return false;
+    context->ford_scan_requested = false;
     context->ford_scan_started = true;
     context->ford_scan_complete = false;
     context->ford_scan_success = false;
@@ -481,8 +486,20 @@ static bool ford_scan_progress_changed(void *opaque)
 static void ford_scan_finished(bool complete, void *opaque)
 {
     ProductContext *context = opaque;
+    if (context == NULL || !context->ford_scan_started) return;
     context->ford_scan_complete = true;
     context->ford_scan_success = complete;
+}
+
+static void request_ford_module_scan(void *opaque)
+{
+    ProductContext *context = opaque;
+    if (context == NULL) return;
+    memset(&context->ford_scan, 0, sizeof(context->ford_scan));
+    context->ford_scan_requested = true;
+    context->ford_scan_started = false;
+    context->ford_scan_complete = false;
+    context->ford_scan_success = false;
 }
 
 static const LinkGtkManufacturerExtension ford_manufacturer_extension = {
@@ -507,6 +524,7 @@ static void connection_changed(LinkTransport *transport, bool connected,
         context->live_sample_count = 0U;
         memset(context->sample_valid, 0, sizeof(context->sample_valid));
         memset(&context->ford_scan, 0, sizeof(context->ford_scan));
+        context->ford_scan_requested = false;
         context->ford_scan_started = false;
         context->ford_scan_complete = false;
         context->ford_scan_success = false;
@@ -563,6 +581,8 @@ int main(int argc, char **argv)
     descriptor.about = &about_info;
     descriptor.connection_changed = connection_changed;
     descriptor.diagnostic_changed = diagnostic_changed;
+    descriptor.diagnostic_restart_action_label = "SCAN FORD MODULES";
+    descriptor.diagnostic_restart_action = request_ford_module_scan;
     descriptor.manufacturer_extension = &ford_manufacturer_extension;
     descriptor.use_client_side_titlebar = true;
     descriptor.context = &context;

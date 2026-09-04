@@ -64,6 +64,10 @@ final class ConnectionViewModel: NSObject, ObservableObject, @preconcurrency For
 
     func connect() { if !isActive { controller.start() } }
     func disconnect() { controller.disconnect() }
+    func scanFordModules() {
+        _ = controller.scanFordModules()
+        refresh()
+    }
 
     var interfaceLocaleIdentifier: String { selectedLanguageID }
 

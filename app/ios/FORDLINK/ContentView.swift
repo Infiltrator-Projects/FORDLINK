@@ -306,9 +306,20 @@ private struct ProductModulesView: View {
                 }
                 LinkLabeledPanel(title: "Ford module scan", systemImage: "rectangle.3.group.bubble.left.fill") {
                     productValueRow("Status", model.fordModuleSummary, icon: "magnifyingglass")
+                    Button {
+                        model.scanFordModules()
+                    } label: {
+                        Label("Scan Ford modules", systemImage: "magnifyingglass.circle.fill")
+                            .font(.subheadline.weight(.semibold))
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 10)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(ProductTheme.accent)
+                    .disabled(!model.isReady)
                     if model.fordModuleRows.isEmpty {
                         Text(model.isActive
-                             ? "The read-only Ford module census runs automatically after the standard fault pass."
+                             ? "The Ford module census is manual and runs only when you press Scan Ford modules after standard diagnostics are ready."
                              : "Connect to identify corroborated Ford HS-CAN module endpoints.")
                             .font(.caption)
                             .foregroundStyle(ProductTheme.secondary)

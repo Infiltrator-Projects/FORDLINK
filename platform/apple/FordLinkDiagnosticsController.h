@@ -54,6 +54,7 @@ NS_ASSUME_NONNULL_BEGIN
 @property(nonatomic, readonly) NSUInteger recordedSampleCount;
 - (void)start;
 - (void)disconnect;
+- (BOOL)scanFordModules;
 - (NSString *)localizedTextForKey:(NSString *)key;
 - (void)setSelectedLanguageTag:(NSString *)tag;
 - (void)setSelectedMeasurementSystemKey:(NSString *)key;
