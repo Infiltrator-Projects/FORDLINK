@@ -6,12 +6,20 @@ FORDLINK is the Ford-specific member of the LINK diagnostic family.
 
 FORDLINK owns only Ford-specific diagnostic behaviour: vehicle/profile
 selection, ECU/module knowledge, proprietary identifiers, manufacturer DTC
-knowledge, addressing, security/session policy and brand-specific workflows.
+knowledge, addressing, security/session policy, branding and brand-specific
+workflows.
 
-Reusable transport and protocol code belongs in
-[LINK](https://github.com/Infiltrator-Projects/LINK): CAN/CAN-FD, ISO-TP,
-OBD-II/J1979, UDS, KWP where shared, diagnostic flow, adapters/transports and
-portable platform support.
+LINK is the shared automotive application engine for the family, not only a
+protocol library. It owns reusable diagnostic behaviour and common application
+infrastructure, including CAN/CAN-FD, ISO-TP, OBD-II/J1979, generic DTC
+knowledge, UDS, KWP where shared, diagnostic flow, adapters/transports,
+portable platform support, the operator-task information architecture and
+shared presentation behaviour that should remain consistent across product
+faces.
+
+Ford network, module, signal, test and service knowledge feeds that shared task
+model; FORDLINK must not fork generic navigation, diagnostic sequencing or
+common application behaviour merely to present Ford-specific content.
 
 Manufacturer-specific behaviour must be evidence-backed rather than guessed or
 copied from another brand.
@@ -20,19 +28,21 @@ copied from another brand.
 
 The `src/link` gitlink pins the tested LINK release consumed by FORDLINK. The
 product build uses LINK's shared implementation directly rather than copying
-standard OBD-II, UDS, transport, Apple platform or generic diagnostic code into
-FORDLINK-owned compatibility layers.
+standard OBD-II, UDS, transport, Apple platform or generic diagnostic/application
+code into FORDLINK-owned compatibility layers.
 
 The product smoke test verifies the expected LINK version at build time, while
-LINK's own CI owns regression coverage for the generic standards engine.
+LINK's own CI owns regression coverage for the generic standards and shared
+application engine.
 
 ## Standard diagnostics
 
-FORDLINK inherits its standards-based diagnostic foundation from LINK:
-supported-PID discovery, current and freeze-frame data, readiness, VIN,
-stored/pending/permanent DTC inventory, generic SAE DTC knowledge, OBDonUDS,
-ISO-TP, UDS, KWP where applicable, adapter capability modelling, telemetry,
-evidence and read-only safety policy.
+FORDLINK inherits its standards-based diagnostic foundation and common
+application model from LINK: supported-PID discovery, current and freeze-frame
+data, readiness, VIN, stored/pending/permanent DTC inventory, generic SAE DTC
+knowledge, OBDonUDS, ISO-TP, UDS, KWP where applicable, adapter capability
+modelling, telemetry, evidence, read-only safety policy and the shared
+operator-task information architecture.
 
 Fault presentation also follows LINK's shared scan-state contract. An empty DTC
 list is presented as clean only after the standard fault inventory completed
