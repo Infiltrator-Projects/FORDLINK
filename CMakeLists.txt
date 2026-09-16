@@ -35,10 +35,12 @@ target_include_directories(fordlink-core PUBLIC include)
 target_compile_definitions(fordlink-core PRIVATE FORDLINK_VERSION="${PROJECT_VERSION}")
 target_link_libraries(fordlink-core PUBLIC LINK::Core)
 
+file(READ "${CMAKE_CURRENT_SOURCE_DIR}/src/link/VERSION" FORDLINK_PINNED_LINK_VERSION)
+string(STRIP "${FORDLINK_PINNED_LINK_VERSION}" FORDLINK_PINNED_LINK_VERSION)
 add_executable(fordlink-smoke tests/test_smoke.c)
 target_compile_definitions(fordlink-smoke PRIVATE
   FORDLINK_EXPECTED_VERSION="${PROJECT_VERSION}"
-  FORDLINK_EXPECTED_LINK_VERSION="0.14.94")
+  FORDLINK_EXPECTED_LINK_VERSION="${FORDLINK_PINNED_LINK_VERSION}")
 target_link_libraries(fordlink-smoke PRIVATE FORDLINK::Core)
 add_test(NAME fordlink-smoke COMMAND fordlink-smoke)
 
