@@ -4,7 +4,7 @@ FORDLINK is the Ford-specific member of the LINK diagnostic family.
 
 ## Engineering ethos
 
-What should a Ford diagnostic product own when Ford network behaviour extends beyond the generic OBD lane? FORDLINK turns Ford-specific network, module and diagnostic evidence into product behaviour on top of the exact shared LINK engine.
+What should a Ford diagnostic product built from first principles own when Ford network behaviour extends beyond the generic OBD lane? FORDLINK turns Ford-specific network, module and diagnostic evidence into product behaviour on top of the exact shared LINK engine.
 
 LINK owns standards-based transport, OBD, UDS, sequencing, safety and common application behaviour. FORDLINK owns Ford network taxonomy, module identities, verified enhanced-diagnostic definitions and manufacturer-specific interpretation. Existing tools and public material are evidence to learn from, not code or proprietary databases to depend on or imitate blindly; unsupported behaviour remains explicitly unsupported.
 
