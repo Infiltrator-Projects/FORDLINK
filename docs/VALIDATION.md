@@ -1,26 +1,40 @@
 # Validation
 
-## Evidence model
+## Automated coverage
 
-Compilation, deterministic tests, integration tests and human/physical-environment validation demonstrate different properties and must not be conflated.
+FORDLINK has direct C regression tests for:
 
-## Automated gates
+- product/dependency smoke integration;
+- Ford network model;
+- module catalogue/identity;
+- manufacturer module scan;
+- signal model;
+- procedure model.
 
-- .github/workflows/ci.yml
-- .github/workflows/release.yml
+These tests sit above LINK's own protocol, transport and safety suite.
 
-tests/ covers module scanning, module catalogues, network modelling, procedures, signals and overall product smoke behaviour.
+## Layered evidence
 
-## Manual/environment evidence
+A passing FORDLINK unit test proves product-model behaviour. LINK tests prove shared transport/protocol contracts. Neither alone proves an MS-CAN switch or module response on a physical Ford vehicle.
 
-MS-CAN and other Ford-specific lanes depend on real adapter switching and physical vehicle topology; code-level tests cannot prove hardware access to those buses.
+## Network validation
 
-Manual observations should record the environment and behaviour actually tested; they supplement rather than replace deterministic regression coverage.
+Enhanced-network support requires three independent facts:
+
+1. the vehicle/profile actually uses the lane;
+2. the adapter can access/switch to the lane;
+3. the request/target is appropriate on that lane.
+
+The data model may represent a network before all three are physically qualified, but the product must not present unqualified access as working.
+
+## Procedure validation
+
+Procedures require explicit preconditions, request semantics, expected response/failure handling and safety classification. Presence in a catalogue is not execution proof.
+
+## Physical evidence
+
+Real Ford vehicles and adapters remain required for module/network qualification. Captured traces may become regression fixtures once provenance and sanitisation are acceptable.
 
 ## Release criterion
 
-The exact revision intended for release must satisfy its required automated checks and must not document planned or unverified behaviour as complete.
-
-## Regression rule
-
-Reproducible defects should become permanent tests at the narrowest useful layer. As the product grows, validation should grow with the owned behaviour rather than becoming a separate afterthought.
+The exact FORDLINK source and LINK dependency must pass product and shared CI. Documentation must distinguish modelled, test-covered and physically verified capability.

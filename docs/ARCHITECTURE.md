@@ -2,32 +2,56 @@
 
 ## Purpose
 
-FORDLINK is the Ford manufacturer product face over LINK, owning Ford network taxonomy, module identity, verified enhanced-diagnostics knowledge and manufacturer-specific interpretation.
+FORDLINK is the Ford manufacturer product face over LINK. It is deliberately richer than the current BMW/Audi faces because the repository already owns a Ford-specific network, module, signal and procedure model.
 
-## System decomposition
+## Dependency hierarchy
 
-- Ford product facade
-- exact LINK dependency
-- Ford network/module/signal/procedure model
-- Linux/iPhone/Windows-facing product surfaces
-- manufacturer scan and product tests
+```text
+Infiltratr Common
+        ↓
+       LINK
+        ↓
+    FORDLINK
+```
 
-## Ownership boundaries
+`fordlink-core` links publicly against `LINK::Core`. Generic transport, standards, diagnostic sequencing, safety and shared application behaviour remain in LINK.
 
-LINK owns generic transports, OBD, UDS, sequencing, safety and common application behaviour. FORDLINK owns Ford-specific network lanes, module identities, definitions and verified enhanced diagnostics.
+## Ford product core
 
-Platform APIs, hosted services, research sources and first-party shared libraries provide mechanisms or evidence behind explicit boundaries. They do not silently own the product's interpretation or policy.
+The product core is split by responsibility:
 
-## Source of truth
+- `src/network.c` — Ford network/lane model;
+- `src/module.c` — module catalogue and identity;
+- `src/identity.c` — product/vehicle identity helpers;
+- `src/module_scan.c` — bounded manufacturer module probing;
+- `src/signal.c` — Ford-specific signal metadata/model;
+- `src/procedure.c` — Ford procedure metadata/contract;
+- `src/fordlink.c` — product facade/version identity.
 
-Executable behaviour is defined by code and tests. This document defines architectural ownership and dependency direction. Specialist documents refine narrower domains and must remain consistent with it.
+This separation prevents a growing manufacturer layer from turning into one undifferentiated database.
 
-## Change discipline
+## Network model
 
-Keep platform handles/toolkit details out of domain contracts where practical. Keep generic behaviour in its shared owner rather than copying it. Preserve explicit unavailable/unsupported/failure states across layers.
+FORDLINK distinguishes HS-CAN, MS-CAN and additional profile-specific Ford network lanes. Standard OBD activity uses the normal LINK/OBD lane. Enhanced lanes require explicit adapter capability and verified physical routing; the data model does not pretend one generic CAN path reaches every Ford module.
 
-## Specialist documentation
+## Module discovery
 
-- docs/FORD_DATA_MODEL.md
-- docs/FORD_MODULES.md
-- docs/FORD_NETWORKS.md
+The manufacturer scanner uses LINK's shared ECU-probe/safety machinery. Ford-specific target candidates and interpretation stay here.
+
+A module catalogue entry or known endpoint does not itself authorize every possible service. Discovery and procedure permissions remain bounded.
+
+## Signals and procedures
+
+Signals and procedures are separate domains. A decoded live-data item does not imply a service procedure is safe; a documented procedure does not make every parameter writable.
+
+## Platform faces
+
+Linux GTK4, LINK-shared Windows Discover and native iPhone presentation all consume FORDLINK::Core. Product identity remains local; shared application mechanics remain in LINK.
+
+## Version identity
+
+Root VERSION and the public FORDLINK version are checked for agreement. The smoke test also records the pinned LINK version, making dependency drift visible.
+
+## Tests
+
+Dedicated tests cover network modelling, module catalogue, module scanning, signals, procedures and product smoke/dependency integration.

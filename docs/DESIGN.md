@@ -2,27 +2,34 @@
 
 ## First-principles position
 
-FORDLINK starts from the behaviour it must own. Existing products, research, provider APIs and tools are studied as evidence, then accepted, changed or rejected according to the needs of this project.
+FORDLINK models Ford diagnostics from the vehicle-network structure outward rather than treating every ECU as a generic OBD responder.
 
 ## Goals
 
-- model Ford network lanes explicitly rather than pretending all modules sit on one generic bus
-- keep manufacturer actions evidence-backed and bounded
-- reuse LINK for every genuinely generic behaviour
-- separate data, tests and procedures so one kind of evidence cannot silently imply another
+- explicit Ford network lanes and adapter capability;
+- Ford-specific module/identity knowledge separated from generic standards behaviour;
+- bounded read-only manufacturer discovery;
+- signals, procedures and service knowledge represented as distinct contracts;
+- one shared LINK engine for transport, standards, sequencing and safety.
 
-## Non-goals
+## Evidence policy
 
-FORScan or other mature tools may inform architecture but their proprietary code/databases are not copied. Generic OBD support does not imply enhanced Ford coverage.
+Mature Ford tools may reveal architectural ideas worth studying, but proprietary code, databases, PID tables, security algorithms and procedure payloads are not copied.
 
-## Dependency and language policy
+Manufacturer knowledge should be traceable to public documentation, verified capture or repeatable physical observation.
 
-Prefer first-party C/C++ implementation for native/core behaviour where suitable. Use platform-native services where they provide a stronger documented contract. A dependency or external source must not become an undocumented source of semantic truth.
+## Network safety
 
-## Failure and uncertainty
+An MS-CAN or other enhanced lane must not be selected simply because a module is listed there. The adapter must prove the capability and the product must know how that vehicle/profile exposes the lane.
 
-Unavailable, unsupported, uncertain and failed are distinct. Prefer visible uncertainty or refusal to guessed success. Persistent or destructive operations require explicit preconditions and post-verification appropriate to their risk.
+## Procedure safety
 
-## Decision quality
+Procedure definitions have a higher evidence bar than read-only identity/live data. The project separates procedure metadata from signal metadata so one cannot silently grant the other.
 
-A change should improve correctness, safety, fidelity, performance, usability or maintainability and include a validation method. Newness alone is not a design argument.
+## Shared ownership
+
+If logic is generic across manufacturers, it belongs in LINK. Ford-specific interpretation remains here. This avoids a "Ford fork" of OBD/UDS while still allowing Ford's network model to be explicit.
+
+## Failure policy
+
+Unsupported lane switching, unknown module meaning, failed discovery and clean DTC state are separate conditions. The UI/data model must not collapse them.
