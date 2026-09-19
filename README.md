@@ -1,6 +1,6 @@
 # FORDLINK
 
-**Project copyright:** © 2000–2026 Shannon Smith
+**Project copyright:** © 2000-2026 Shannon Smith
 
 FORDLINK is the Ford-specific member of the LINK diagnostic family.
 
