@@ -91,3 +91,22 @@ software, including FORScan Lite NG, but FORDLINK does not contain FORScan's
 native code, private database records, proprietary PID catalogue, security
 algorithms or procedure command tables. See `docs/FORD_MODULES.md` and
 `docs/FORD_DATA_MODEL.md`.
+
+
+## Linux installation paths
+
+The Linux application has two supported build paths from the same native C source graph:
+
+```sh
+# Generic distributable build used for the published .deb
+cmake -S . -B build-generic -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr -DFORDLINK_BUILD_LINUX_GUI=ON -DFORDLINK_BUILD_PROFILE=generic
+cmake --build build-generic --parallel
+cpack --config build-generic/CPackConfig.cmake -G DEB
+
+# Hardware-native local source build
+cmake -S . -B build-native -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr -DFORDLINK_BUILD_LINUX_GUI=ON -DFORDLINK_BUILD_PROFILE=native
+cmake --build build-native --parallel
+sudo cmake --install build-native
+```
+
+The generic profile is the release/packaging contract. The native profile compiles the same implementation locally and enables compiler CPU tuning for the machine doing the build.
