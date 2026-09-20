@@ -25,7 +25,7 @@ jobs:
           sudo apt-get install -y --no-install-recommends build-essential cmake dpkg-dev libgtk-4-dev libbluetooth-dev libusb-1.0-0-dev pkg-config
       - id: version
         run: echo "version=$(tr -d '[:space:]' < VERSION)" >> "$GITHUB_OUTPUT"
-      - run: cmake -S . -B build-linux -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr -DFORDLINK_BUILD_LINUX_GUI=ON -DBUILD_TESTING=OFF
+      - run: cmake -S . -B build-linux -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr -DFORDLINK_BUILD_LINUX_GUI=ON -DFORDLINK_BUILD_PROFILE=generic -DBUILD_TESTING=OFF
       - run: cmake --build build-linux --parallel
       - name: Package GUI DEB
         env:
