@@ -85,7 +85,7 @@ struct ContentView: View {
             .safeAreaInset(edge: .bottom, spacing: 0) {
                 LinkDiagnosticAboutButton(
                     productName: "FORDLINK",
-                    copyright: "© 2000-2026 Shannon Smith") {
+                    copyright: "© 1993-2026 Shannon Smith") {
                         showingAbout = true
                     }
                     .linkDiagnosticTheme(productTheme)
@@ -109,7 +109,7 @@ struct ContentView: View {
             version: model.versionText,
             summary: "A C-first, open-source Ford vehicle diagnostics platform authored by Shannon Smith.",
             authors: ["Shannon Smith"],
-            copyright: "Copyright © 2000-2026 Shannon Smith",
+            copyright: "Copyright © 1993-2026 Shannon Smith",
             website: URL(string: "https://github.com/Infiltrator-Projects/FORDLINK"),
             licenseName: "GPL-3.0-or-later",
             licenseText: "FORDLINK is free software licensed under the GNU General Public License version 3 or, at your option, any later version (GPL-3.0-or-later).\n\nSee LICENSE in the source package for the complete licence text.",

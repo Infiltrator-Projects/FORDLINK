@@ -110,7 +110,7 @@ if(FORDLINK_BUILD_WINDOWS_DISCOVER)
   endif()
   link_add_windows_discover(fordlink-discover
     PRODUCT_NAME "FORDLINK" PRODUCT_SLUG "fordlink" WINDOW_CLASS "FORDLINKDiscoverWindow"
-    PRODUCT_VERSION "${PROJECT_VERSION}" PRODUCT_COPYRIGHT "Copyright (C) 2000-2026 Shannon Smith"
+    PRODUCT_VERSION "${PROJECT_VERSION}" PRODUCT_COPYRIGHT "Copyright (C) 1993-2026 Shannon Smith"
     PRODUCT_SUBTITLE "Ford Diagnostics"
     PRODUCT_DESCRIPTION "A C-first, open-source Ford vehicle diagnostics platform."
     PRODUCT_AUTHORS "Shannon Smith"

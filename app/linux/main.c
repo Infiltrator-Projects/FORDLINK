@@ -560,7 +560,7 @@ int main(int argc, char **argv)
         .version = fordlink_version(),
         .description = "A C-first, open-source Ford vehicle diagnostics platform authored by Shannon Smith.",
         .authors = "Shannon Smith",
-        .copyright = "Copyright © 2000-2026 Shannon Smith",
+        .copyright = "Copyright © 1993-2026 Shannon Smith",
         .website = "https://github.com/Infiltrator-Projects/FORDLINK",
         .license_name = "GPL-3.0-or-later",
         .license_text =
