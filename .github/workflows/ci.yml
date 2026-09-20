@@ -151,6 +151,16 @@ jobs:
           dpkg-deb -c "$deb" | grep -F './usr/share/applications/fordlink.desktop' >/dev/null
           dpkg-deb -c "$deb" | grep -F './usr/lib/udev/rules.d/60-fordlink-openport2.rules' >/dev/null
 
+      - name: Verify native Linux source build
+        shell: bash
+        run: |
+          set -euo pipefail
+          cmake -S . -B build-native -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr -DFORDLINK_BUILD_LINUX_GUI=ON -DFORDLINK_BUILD_PROFILE=native -DBUILD_TESTING=OFF
+          cmake --build build-native --parallel
+          rm -rf native-stage
+          DESTDIR="$PWD/native-stage" cmake --install build-native
+          test -x native-stage/usr/bin/fordlink
+
   windows-gui:
     name: Windows Discover GUI
     runs-on: windows-latest
