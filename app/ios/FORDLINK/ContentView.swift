@@ -108,6 +108,7 @@ struct ContentView: View {
             subtitle: "FORD · LINK DIAGNOSTICS",
             version: model.versionText,
             summary: "A C-first, open-source Ford vehicle diagnostics platform authored by Shannon Smith.",
+            build: "Source / Xcode build",
             authors: ["Shannon Smith"],
             copyright: "Copyright © 1993-2026 Shannon Smith",
             website: URL(string: "https://github.com/Infiltrator-Projects/FORDLINK"),

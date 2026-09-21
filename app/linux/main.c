@@ -8,6 +8,7 @@
 #include "link/obd2.h"
 #include "link/fault_scan.h"
 #include <gtk/gtk.h>
+#include <infiltratr/core.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -559,6 +560,7 @@ int main(int argc, char **argv)
         .subtitle = "FORD · LINK DIAGNOSTICS",
         .version = fordlink_version(),
         .description = "A C-first, open-source Ford vehicle diagnostics platform authored by Shannon Smith.",
+        .build = infiltratr_build_profile_label(FORDLINK_BUILD_PROFILE_ID),
         .authors = "Shannon Smith",
         .copyright = "Copyright © 1993-2026 Shannon Smith",
         .website = "https://github.com/Infiltrator-Projects/FORDLINK",

@@ -92,6 +92,8 @@ if(FORDLINK_BUILD_LINUX_GUI)
   add_executable(fordlink app/linux/main.c "${FORDLINK_LINUX_RESOURCE_SOURCE}")
   set_source_files_properties("${FORDLINK_LINUX_RESOURCE_SOURCE}" PROPERTIES COMPILE_OPTIONS "-w")
   target_link_libraries(fordlink PRIVATE FORDLINK::Core PkgConfig::GTK4)
+  target_compile_definitions(fordlink PRIVATE
+    FORDLINK_BUILD_PROFILE_ID="${FORDLINK_BUILD_PROFILE}")
   link_enable_linux_gtk_shell(fordlink UDEV_RULE_NAME "60-fordlink-openport2.rules")
   install(TARGETS fordlink RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
   install(FILES app/linux/assets/fordlink-emblem.png DESTINATION "${CMAKE_INSTALL_DATADIR}/pixmaps" RENAME fordlink.png)
