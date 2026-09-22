@@ -5,7 +5,7 @@
 #endif
 #if defined(__APPLE__) && TARGET_OS_IOS
 #ifndef LINK_SOURCE_REVISION
-#define LINK_SOURCE_REVISION "38826aa2dca78072343a201553460e61cc2f726f"
+#define LINK_SOURCE_REVISION "0caaf4026dcf807397649cd27a38f25ec3be2934"
 #define FORDLINK_DEFINED_LINK_SOURCE_REVISION 1
 #endif
 #include "link/platform/apple/LinkPortableCore.c"
