@@ -2,6 +2,7 @@
 
 ## 0.2.24 — 2026-09-21
 
+- Advance the final release tree to LINK 0.15.50, which pins Infiltratr Common 1.19.22, and synchronise iOS dependency provenance/version metadata with the exact gitlink.
 - Standardise About presentation on the suite-wide System Monitor contract through LINK 0.15.40.
 - Expose the canonical build identity as its own About field instead of product-specific layout text.
 - Keep product branding in the application shell while LINK owns About geometry and Website/Credits/Licence/Close semantics across supported platforms.
