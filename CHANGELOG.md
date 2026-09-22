@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.25 — 2026-09-22
+
+- Advance FORDLINK to LINK 0.15.51, which pins Infiltratr Common 1.19.22, and synchronise the Apple embedded-LINK provenance with the exact gitlink.
+
 ## 0.2.24 — 2026-09-21
 
 - Advance the final release tree to LINK 0.15.50, which pins Infiltratr Common 1.19.22, and synchronise iOS dependency provenance/version metadata with the exact gitlink.
