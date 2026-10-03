@@ -13,7 +13,9 @@ concurrency:
 jobs:
   core:
     name: Portable C11 core
-    runs-on: ubuntu-24.04
+    runs-on: [self-hosted, Linux, X64, linux-native]
+    env:
+      PATH: /usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
@@ -163,20 +165,23 @@ jobs:
 
   windows-gui:
     name: Windows Discover GUI
-    runs-on: windows-latest
+    runs-on: [self-hosted, Windows, ARM64]
     timeout-minutes: 20
+    defaults:
+      run:
+        shell: powershell
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           submodules: recursive
       - name: Configure
-        shell: pwsh
+        shell: powershell
         run: cmake -S . -B build-win32 -A Win32 -DFORDLINK_BUILD_WINDOWS_DISCOVER=ON -DBUILD_TESTING=OFF
       - name: Build
-        shell: pwsh
+        shell: powershell
         run: cmake --build build-win32 --config Release --target fordlink-discover --parallel
       - name: Prove GUI launches
-        shell: pwsh
+        shell: powershell
         run: "& 'src/link/platform/windows/smoke-launch.ps1' -Executable 'build-win32/Release/fordlink-discover.exe' -ExpectedTitle 'FORDLINK Discover'"
 
   iphone-gui:
@@ -197,3 +202,4 @@ jobs:
           xcodebuild -project app/ios/FORDLINK.xcodeproj -scheme FORDLINK -configuration Release \
             -sdk iphonesimulator -destination 'generic/platform=iOS Simulator' CODE_SIGNING_ALLOWED=NO \
             MARKETING_VERSION="$version" FORDLINK_SOURCE_REVISION="$GITHUB_SHA" build
+
